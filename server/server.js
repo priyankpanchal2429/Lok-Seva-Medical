@@ -38,6 +38,7 @@ app.use(helmet());
 app.use(cors({
   origin: config.clientUrl,
   credentials: true,
+  optionsSuccessStatus: 200, // For legacy browser compatibility
 }));
 
 // Rate limiting — global

@@ -226,7 +226,7 @@ function logout(req, res) {
     ip: req.ip,
   });
 
-  return res.status(200).json({ message: 'Logged out successfully.' });
+  return res.status(204).end(); // 204 No Content for successful logout
 }
 
 /**
