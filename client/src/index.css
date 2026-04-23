@@ -3,6 +3,7 @@
    Tailwind CSS v4 + Custom Theme Tokens
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
@@ -216,8 +217,3 @@ body {
   min-height: 42px; /* Reserves space to prevent jumping */
   margin-bottom: 12px;
 }
-/* ============================================================
-   Google Font — Inter
-   ============================================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
