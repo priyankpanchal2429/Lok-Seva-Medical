@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment
+server/.env
+
+# Seeded data (contains hashed passwords)
+server/data/users.json
+
+# Build output
+client/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

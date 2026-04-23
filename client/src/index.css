@@ -1,0 +1,145 @@
+/* ============================================================
+   Lok Seva Medical Store — Global Styles
+   Tailwind CSS v4 + Custom Theme Tokens
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* ============================================================
+   Theme Tokens (CSS Custom Properties)
+   Light mode is the default. Dark mode via [data-theme="dark"]
+   ============================================================ */
+
+:root {
+  /* Primary — Medical Green */
+  --color-primary: #2E7D32;
+  --color-primary-hover: #256B29;
+  --color-primary-light: #E8F5E9;
+
+  /* Backgrounds */
+  --color-bg: #FAFAFA;
+  --color-surface: #FFFFFF;
+
+  /* Text */
+  --color-text: #1A1A1A;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+
+  /* Borders */
+  --color-border: #E5E7EB;
+
+  /* Error */
+  --color-error: #DC2626;
+  --color-error-bg: #FEF2F2;
+
+  /* Input focus */
+  --color-focus-ring: rgba(46, 125, 50, 0.3);
+
+  /* Left panel */
+  --color-panel-bg: #2E7D32;
+  --color-panel-text: #FFFFFF;
+  --color-panel-subtitle: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] {
+  /* Primary — Muted Green */
+  --color-primary: #66BB6A;
+  --color-primary-hover: #81C784;
+  --color-primary-light: #1B3A1D;
+
+  /* Backgrounds */
+  --color-bg: #111111;
+  --color-surface: #1E1E1E;
+
+  /* Text */
+  --color-text: #F0F0F0;
+  --color-text-secondary: #A0A0A0;
+  --color-text-muted: #6B6B6B;
+
+  /* Borders */
+  --color-border: #333333;
+
+  /* Error */
+  --color-error: #F87171;
+  --color-error-bg: #2D1B1B;
+
+  /* Input focus */
+  --color-focus-ring: rgba(102, 187, 106, 0.3);
+
+  /* Left panel */
+  --color-panel-bg: #1B5E20;
+  --color-panel-text: #E8F5E9;
+  --color-panel-subtitle: rgba(232, 245, 233, 0.6);
+}
+
+/* ============================================================
+   Base Reset & Typography
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   Utility Classes
+   ============================================================ */
+
+/* Visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible outline for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Scrollbar (subtle)
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+/* ============================================================
+   Google Font — Inter
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
