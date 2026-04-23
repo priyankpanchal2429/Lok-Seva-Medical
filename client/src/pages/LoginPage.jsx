@@ -4,44 +4,38 @@
  * Handles input validation, sanitization, and API communication.
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { sanitizeInput, isEmpty } from '../utils/sanitize';
 import ThemeToggle from '../components/ThemeToggle';
 
 /** SVG eye icon for showing password */
-function EyeIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
+const EyeIcon = memo(() => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+));
 
 /** SVG eye-off icon for hiding password */
-function EyeOffIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-      <line x1="1" y1="1" x2="23" y2="23" />
-      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-    </svg>
-  );
-}
+const EyeOffIcon = memo(() => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+    <line x1="1" y1="1" x2="23" y2="23" />
+    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+  </svg>
+));
 
 /** Small medical cross icon for branding */
-function MedicalIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ opacity: 0.9 }}>
-      <path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" />
-      <line x1="12" y1="8" x2="12" y2="16" />
-      <line x1="8" y1="12" x2="16" y2="12" />
-    </svg>
-  );
-}
+const MedicalIcon = memo(() => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ opacity: 0.9 }}>
+    <path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" />
+    <line x1="12" y1="8" x2="12" y2="16" />
+    <line x1="8" y1="12" x2="16" y2="12" />
+  </svg>
+));
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -122,7 +116,7 @@ export default function LoginPage() {
     try {
       const sanitizedUserId = sanitizeInput(userId);
 
-      const response = await api.post('/auth/login', {
+      await api.post('/auth/login', {
         userId: sanitizedUserId,
         password, // Password sent as-is (bcrypt handles comparison server-side)
       });
@@ -147,15 +141,15 @@ export default function LoginPage() {
     }
   }, [userId, password, rememberMe, validateForm, navigate]);
 
-  /** Prevent paste on password field */
+  /** Prevent paste on password field for extra security */
   const handlePasswordPaste = useCallback((e) => {
     e.preventDefault();
   }, []);
 
   return (
-    <div style={styles.container}>
+    <div className="login-container">
       {/* ===== LEFT PANEL ===== */}
-      <div style={styles.leftPanel}>
+      <div className="login-left-panel">
         <div style={styles.leftContent}>
           <MedicalIcon />
           <h1 style={styles.storeName}>Lok Seva Medical Store</h1>
@@ -167,26 +161,28 @@ export default function LoginPage() {
       </div>
 
       {/* ===== RIGHT PANEL ===== */}
-      <div style={styles.rightPanel}>
+      <div className="login-right-panel">
         {/* Theme toggle — top right */}
         <div style={styles.themeToggleWrapper}>
           <ThemeToggle />
         </div>
 
         {/* Login Card */}
-        <div style={styles.card}>
+        <div className="login-card">
           <div style={styles.cardHeader}>
             <h2 style={styles.cardTitle}>Sign In</h2>
             <p style={styles.cardSubtitle}>Enter your credentials to continue</p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate style={styles.form}>
-            {/* General error message */}
-            {generalError && (
-              <div id="login-error" style={styles.generalError} role="alert">
-                {generalError}
-              </div>
-            )}
+            {/* Error container — fixed height to prevent layout shifts */}
+            <div className="error-container">
+              {generalError && (
+                <div id="login-error" style={styles.generalError} role="alert">
+                  {generalError}
+                </div>
+              )}
+            </div>
 
             {/* User ID */}
             <div style={styles.fieldGroup}>
@@ -220,7 +216,7 @@ export default function LoginPage() {
                   onChange={handlePasswordChange}
                   onPaste={handlePasswordPaste}
                   placeholder="Enter your password"
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   disabled={isSubmitting}
                   style={{
                     ...styles.input,
@@ -260,10 +256,7 @@ export default function LoginPage() {
               id="login-button"
               type="submit"
               disabled={isSubmitting}
-              style={{
-                ...styles.submitButton,
-                ...(isSubmitting ? styles.submitButtonDisabled : {}),
-              }}
+              className="login-button"
             >
               {isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>
@@ -275,30 +268,10 @@ export default function LoginPage() {
 }
 
 // ============================================================
-// Styles (inline for performance — no separate CSS file needed)
+// Internal Utility Styles
 // ============================================================
 
 const styles = {
-  container: {
-    display: 'flex',
-    minHeight: '100vh',
-    width: '100%',
-  },
-
-  // ----- Left Panel -----
-  leftPanel: {
-    position: 'relative',
-    width: '40%',
-    backgroundColor: 'var(--color-panel-bg)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    // Hide on mobile
-    '@media (max-width: 768px)': {
-      display: 'none',
-    },
-  },
   leftContent: {
     position: 'relative',
     zIndex: 2,
@@ -328,35 +301,14 @@ const styles = {
     background: 'radial-gradient(circle at 30% 70%, rgba(255,255,255,0.05) 0%, transparent 60%)',
     zIndex: 1,
   },
-
-  // ----- Right Panel -----
-  rightPanel: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'var(--color-bg)',
-    position: 'relative',
-    padding: '24px',
-  },
   themeToggleWrapper: {
     position: 'absolute',
     top: '20px',
     right: '20px',
     zIndex: 10,
   },
-
-  // ----- Card -----
-  card: {
-    width: '100%',
-    maxWidth: '400px',
-    backgroundColor: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    borderRadius: '4px',
-    padding: '40px 32px',
-  },
   cardHeader: {
-    marginBottom: '28px',
+    marginBottom: '20px',
   },
   cardTitle: {
     fontSize: '22px',
@@ -368,12 +320,10 @@ const styles = {
     fontSize: '13px',
     color: 'var(--color-text-muted)',
   },
-
-  // ----- Form -----
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px',
+    gap: '16px',
   },
   fieldGroup: {
     display: 'flex',
@@ -453,23 +403,5 @@ const styles = {
     height: '15px',
     accentColor: 'var(--color-primary)',
     cursor: 'pointer',
-  },
-  submitButton: {
-    width: '100%',
-    padding: '11px 16px',
-    fontSize: '14px',
-    fontWeight: 600,
-    fontFamily: 'Inter, sans-serif',
-    backgroundColor: 'var(--color-primary)',
-    color: '#FFFFFF',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background-color 0.15s ease',
-    marginTop: '4px',
-  },
-  submitButtonDisabled: {
-    opacity: 0.7,
-    cursor: 'not-allowed',
   },
 };

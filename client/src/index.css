@@ -137,7 +137,85 @@ body {
   background: var(--color-border);
   border-radius: 3px;
 }
+/* ============================================================
+   Login Page Layout Classes
+   ============================================================ */
 
+.login-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.login-left-panel {
+  position: relative;
+  width: 40%;
+  background-color: var(--color-panel-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.login-right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  position: relative;
+  padding: 24px;
+}
+
+/* Hide left panel on tablets and phones */
+@media (max-width: 900px) {
+  .login-left-panel {
+    display: none;
+  }
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 40px 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.login-button {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 4px;
+}
+
+.login-button:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.login-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-container {
+  min-height: 42px; /* Reserves space to prevent jumping */
+  margin-bottom: 12px;
+}
 /* ============================================================
    Google Font — Inter
    ============================================================ */
