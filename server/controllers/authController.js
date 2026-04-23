@@ -206,8 +206,12 @@ async function login(req, res) {
       user: { id: user.id, name: user.name },
     });
   } catch (error) {
-    console.error('[AUTH] Login error:', error.message);
-    return res.status(500).json({ error: 'Internal server error. Please try again.' });
+    console.error('[AUTH] Login error:', error.stack || error.message);
+    // Temporarily return the actual error message to the frontend for debugging
+    return res.status(500).json({ 
+      error: 'Internal server error.', 
+      debug: error.message 
+    });
   }
 }
 

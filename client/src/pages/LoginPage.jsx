@@ -131,8 +131,11 @@ export default function LoginPage() {
       // Navigate to dashboard on success
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      const message = error.response?.data?.error || 'Login failed. Please try again.';
-      setGeneralError(message);
+      const data = error.response?.data;
+      const message = data?.error || 'Login failed. Please try again.';
+      const debug = data?.debug ? ` (Debug: ${data.debug})` : '';
+      
+      setGeneralError(`${message}${debug}`);
 
       // 1-second delay before re-enabling the form (basic frontend rate limit)
       await new Promise((resolve) => setTimeout(resolve, 1000));
