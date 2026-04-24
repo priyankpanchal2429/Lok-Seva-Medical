@@ -116,10 +116,15 @@ export default function LoginPage() {
     try {
       const sanitizedUserId = sanitizeInput(userId);
 
-      await api.post('/auth/login', {
+      const response = await api.post('/auth/login', {
         userId: sanitizedUserId,
         password, // Password sent as-is (bcrypt handles comparison server-side)
       });
+
+      // Store JWT in localStorage
+      if (response.data.token) {
+        localStorage.setItem('lok-seva-token', response.data.token);
+      }
 
       // Handle "Remember Me"
       if (rememberMe) {

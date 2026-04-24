@@ -13,7 +13,7 @@ const mongoose = require('mongoose');
 const config = require('./config/env');
 const authRoutes = require('./routes/authRoutes');
 const { globalLimiter } = require('./middleware/rateLimiter');
-const { csrfMiddleware } = require('./middleware/csrfMiddleware');
+
 
 const app = express();
 
@@ -65,7 +65,7 @@ if (config.nodeEnv !== 'test') {
 // CSRF Protection
 // ============================================================
 
-app.use(csrfMiddleware);
+
 
 // ============================================================
 // Routes

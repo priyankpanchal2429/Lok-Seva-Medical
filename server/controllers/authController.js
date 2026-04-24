@@ -219,26 +219,15 @@ async function login(req, res) {
 
     // --- Success: generate tokens ---
     clearAttempts(sanitizedUserId);
-
     const token = jwt.sign(
       { id: user.id, name: user.name },
       config.jwt.secret,
       { expiresIn: config.jwt.expiresIn }
     );
 
-    const csrfToken = generateCsrfToken();
-
-    // Set cookies
-    res.cookie('token', token, getTokenCookieOptions());
-    res.cookie('csrf-token', csrfToken, getCsrfCookieOptions());
-
-    logAuthEvent('LOGIN_SUCCESS', {
-      userId: user.id,
-      ip: req.ip,
-    });
-
     return res.status(200).json({
       message: 'Login successful.',
+      token: token, // Send token in body for localStorage
       user: { id: user.id, name: user.name },
     });
   } catch (error) {

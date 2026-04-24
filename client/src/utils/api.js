@@ -16,13 +16,12 @@ const api = axios.create({
 });
 
 /**
- * Request interceptor — attaches CSRF token from cookie.
- * Reads the csrf-token cookie and sends it as X-CSRF-Token header.
+ * Request interceptor — attaches JWT token from localStorage.
  */
 api.interceptors.request.use((config) => {
-  const csrfToken = getCookie('csrf-token');
-  if (csrfToken) {
-    config.headers['X-CSRF-Token'] = csrfToken;
+  const token = localStorage.getItem('lok-seva-token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
   }
   return config;
 });
