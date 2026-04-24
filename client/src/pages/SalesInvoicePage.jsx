@@ -213,7 +213,13 @@ export default function SalesInvoicePage() {
   const sgst = subtotal * 0.06;  // 6% SGST
   const taxTotal = cgst + sgst;
   const discountAmount = subtotal * (discountPercent / 100);
-  const grandTotal = subtotal + taxTotal - discountAmount;
+  const handlePrint = useCallback(() => {
+    if (items.length === 0) {
+      alert('Please add at least one item to the invoice.');
+      return;
+    }
+    window.print();
+  }, [items]);
 
   return (
     <div className="si-page">
@@ -232,7 +238,7 @@ export default function SalesInvoicePage() {
             <SaveIcon />
             <span>Save Draft</span>
           </button>
-          <button className="si-btn si-btn-primary">
+          <button className="si-btn si-btn-primary" onClick={handlePrint}>
             <PrinterIcon />
             <span>Save & Print</span>
           </button>

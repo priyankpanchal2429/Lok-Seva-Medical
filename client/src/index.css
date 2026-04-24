@@ -1241,3 +1241,157 @@ body {
   gap: 12px;
   border-top: 1px solid var(--color-border);
 }
+
+/* ============================================================
+   Print Styles — Medical Invoice
+   ============================================================ */
+
+@media print {
+  /* Hide all UI elements not needed for the physical invoice */
+  .layout-header,
+  .layout-top-nav,
+  .si-header-actions,
+  .si-search-section,
+  .si-delete-btn,
+  .si-empty-hint,
+  .sidebar-drawer,
+  .sidebar-backdrop,
+  .theme-toggle-btn,
+  .user-header-btn,
+  .si-page-subtitle {
+    display: none !important;
+  }
+
+  /* Reset layout for printing */
+  .layout-root, .layout-main, .si-page {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+  }
+
+  body {
+    background-color: #FFFFFF !important;
+  }
+
+  /* Professional Invoice Header */
+  .si-page-header {
+    text-align: center;
+    border-bottom: 2px solid #000000;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    display: block !important;
+  }
+
+  .si-page-title {
+    font-size: 28px !important;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+
+  .layout-store-name {
+    font-size: 20px !important;
+    display: block !important;
+    margin-bottom: 10px;
+  }
+
+  /* Invoice Grid for print */
+  .si-meta-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1.5fr !important;
+    gap: 15px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .si-card {
+    border: 1px solid #000000 !important;
+    border-radius: 0 !important;
+    padding: 10px !important;
+    box-shadow: none !important;
+  }
+
+  .si-card-title {
+    border-bottom: 1px solid #000000;
+    margin-bottom: 8px !important;
+    padding-bottom: 4px;
+  }
+
+  .si-field-row, .si-field-grid {
+    display: block !important;
+  }
+
+  .si-field {
+    margin-bottom: 5px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .si-label {
+    width: 100px;
+    flex-shrink: 0;
+    color: #000000 !important;
+  }
+
+  .si-input {
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+    font-weight: 600 !important;
+    color: #000000 !important;
+  }
+
+  /* Table styling for print */
+  .si-table {
+    border: 1px solid #000000 !important;
+  }
+
+  .si-th {
+    background-color: #EEEEEE !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+  }
+
+  .si-td {
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+  }
+
+  .si-table-input {
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+    font-weight: 500 !important;
+  }
+
+  /* Summary section */
+  .si-summary-row {
+    margin-top: 20px;
+  }
+
+  .si-summary-card {
+    width: 300px !important;
+    border: 1px solid #000000 !important;
+  }
+
+  .si-summary-line {
+    color: #000000 !important;
+  }
+
+  .si-summary-grand {
+    border-top: 2px solid #000000;
+  }
+
+  .si-discount-input {
+    border: none !important;
+    background: transparent !important;
+    width: auto !important;
+    text-align: left !important;
+  }
+
+  .si-discount-symbol, .si-discount-amount {
+    color: #000000 !important;
+  }
+}
