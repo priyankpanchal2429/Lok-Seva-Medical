@@ -12,10 +12,10 @@
    ============================================================ */
 
 :root {
-  /* Primary — Medical Green */
-  --color-primary: #2E7D32;
-  --color-primary-hover: #256B29;
-  --color-primary-light: #E8F5E9;
+  /* Primary — Teal Blue */
+  --color-primary: #2A7A9D;
+  --color-primary-hover: #1A4D6D;
+  --color-primary-light: #E0F0F5;
 
   /* Backgrounds */
   --color-bg: #FAFAFA;
@@ -34,19 +34,19 @@
   --color-error-bg: #FEF2F2;
 
   /* Input focus */
-  --color-focus-ring: rgba(46, 125, 50, 0.3);
+  --color-focus-ring: rgba(42, 122, 157, 0.25);
 
   /* Left panel */
-  --color-panel-bg: #2E7D32;
+  --color-panel-bg: #2A7A9D;
   --color-panel-text: #FFFFFF;
   --color-panel-subtitle: rgba(255, 255, 255, 0.7);
 }
 
 [data-theme="dark"] {
-  /* Primary — Muted Green */
-  --color-primary: #66BB6A;
-  --color-primary-hover: #81C784;
-  --color-primary-light: #1B3A1D;
+  /* Primary — Lighter Teal */
+  --color-primary: #4A9BBE;
+  --color-primary-hover: #7FB3C1;
+  --color-primary-light: #152D38;
 
   /* Backgrounds */
   --color-bg: #111111;
@@ -65,12 +65,12 @@
   --color-error-bg: #2D1B1B;
 
   /* Input focus */
-  --color-focus-ring: rgba(102, 187, 106, 0.3);
+  --color-focus-ring: rgba(74, 155, 190, 0.3);
 
   /* Left panel */
-  --color-panel-bg: #1B5E20;
-  --color-panel-text: #E8F5E9;
-  --color-panel-subtitle: rgba(232, 245, 233, 0.6);
+  --color-panel-bg: #1A4D6D;
+  --color-panel-text: #B3D7E0;
+  --color-panel-subtitle: rgba(179, 215, 224, 0.6);
 }
 
 /* ============================================================
