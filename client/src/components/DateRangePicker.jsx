@@ -187,6 +187,9 @@ export default function DateRangePicker({ isOpen, onClose, onApply, initialRange
       setEndDate(end);
       setViewDate(new Date(start.getFullYear(), start.getMonth(), 1));
       setActivePreset(presetName);
+      
+      // Automatically apply the selected preset without needing to click the Apply button
+      onApply(formatDateString(start), formatDateString(end));
     }
   };
 
