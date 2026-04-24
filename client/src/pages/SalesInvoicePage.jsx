@@ -6,6 +6,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import DatePicker from '../components/DatePicker';
 
 // ============================================================
 // SVG Icons
@@ -22,6 +23,13 @@ const PlusIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="5" x2="12" y2="19"></line>
     <line x1="5" y1="12" x2="19" y2="12"></line>
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
   </svg>
 );
 
@@ -371,14 +379,14 @@ export default function SalesInvoicePage() {
         <table className="si-table">
           <thead>
             <tr>
-              <th className="si-th" style={{ width: '40px' }}>#</th>
-              <th className="si-th">Medicine Name</th>
-              <th className="si-th" style={{ width: '120px' }}>Batch No.</th>
-              <th className="si-th" style={{ width: '120px' }}>Expiry</th>
-              <th className="si-th" style={{ width: '80px' }}>Qty</th>
-              <th className="si-th" style={{ width: '120px' }}>Unit Price (₹)</th>
-              <th className="si-th" style={{ width: '120px' }}>Total (₹)</th>
-              <th className="si-th" style={{ width: '50px' }}></th>
+              <th className="si-th si-align-center" style={{ width: '40px' }}>#</th>
+              <th className="si-th si-align-left">Medicine Name</th>
+              <th className="si-th si-align-center" style={{ width: '180px' }}>Batch No.</th>
+              <th className="si-th si-align-center" style={{ width: '180px' }}>Expiry</th>
+              <th className="si-th si-align-center" style={{ width: '100px' }}>Qty</th>
+              <th className="si-th si-align-center" style={{ width: '140px' }}>Unit Price (₹)</th>
+              <th className="si-th si-align-right" style={{ width: '110px' }}>Total (₹)</th>
+              <th className="si-th si-align-center" style={{ width: '190px' }}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -392,8 +400,8 @@ export default function SalesInvoicePage() {
             ) : (
               items.map((item, index) => (
                 <tr key={item.id} className="si-table-row">
-                  <td className="si-td si-td-center">{index + 1}</td>
-                  <td className="si-td">
+                  <td className="si-td si-align-center">{index + 1}</td>
+                  <td className="si-td si-align-left">
                     <input
                       className="si-table-input"
                       type="text"
@@ -402,7 +410,7 @@ export default function SalesInvoicePage() {
                       onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)}
                     />
                   </td>
-                  <td className="si-td">
+                  <td className="si-td si-align-center">
                     <input
                       className="si-table-input"
                       type="text"
@@ -411,44 +419,56 @@ export default function SalesInvoicePage() {
                       onChange={(e) => handleUpdateItem(item.id, 'batchNo', e.target.value)}
                     />
                   </td>
-                  <td className="si-td">
-                    <input
-                      className="si-table-input"
-                      type="month"
+                  <td className="si-td si-align-center">
+                    <DatePicker
                       value={item.expiry}
-                      onChange={(e) => handleUpdateItem(item.id, 'expiry', e.target.value)}
+                      onChange={(val) => handleUpdateItem(item.id, 'expiry', val)}
+                      mode="month"
+                      placeholder="MM/YYYY"
+                      className="si-table-input"
                     />
                   </td>
-                  <td className="si-td">
+                  <td className="si-td si-align-center">
                     <input
-                      className="si-table-input si-table-input-num"
+                      className="si-table-input"
                       type="number"
                       min="1"
                       value={item.qty}
                       onChange={(e) => handleUpdateItem(item.id, 'qty', Math.max(1, parseInt(e.target.value) || 1))}
+                      onKeyDown={(e) => ['e', 'E', '+', '-', '.'].includes(e.key) && e.preventDefault()}
                     />
                   </td>
-                  <td className="si-td">
+                  <td className="si-td si-align-center">
                     <input
-                      className="si-table-input si-table-input-num"
+                      className="si-table-input"
                       type="number"
                       min="0"
                       step="0.01"
                       value={item.unitPrice}
                       onChange={(e) => handleUpdateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                     />
                   </td>
-                  <td className="si-td si-td-total">
+                  <td className="si-td si-align-right si-td-total">
                     ₹{(item.qty * item.unitPrice).toFixed(2)}
                   </td>
-                  <td className="si-td si-td-center">
-                    <button
-                      className="si-delete-btn"
-                      onClick={() => handleRemoveItem(item.id)}
-                      title="Remove item"
-                    >
-                      <TrashIcon />
-                    </button>
+                  <td className="si-td si-align-center">
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button
+                        className="si-btn-outline si-btn-sm"
+                        title="Edit item"
+                        style={{ padding: '4px 6px', border: 'none', background: 'transparent' }}
+                      >
+                        <EditIcon />
+                      </button>
+                      <button
+                        className="si-delete-btn"
+                        onClick={() => handleRemoveItem(item.id)}
+                        title="Remove item"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -484,6 +504,7 @@ export default function SalesInvoicePage() {
                 max="100"
                 value={discountPercent}
                 onChange={(e) => setDiscountPercent(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
+                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
               />
               <span className="si-discount-symbol">%</span>
               <span className="si-discount-amount">- ₹{discountAmount.toFixed(2)}</span>

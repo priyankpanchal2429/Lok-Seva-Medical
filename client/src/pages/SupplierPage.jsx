@@ -1,6 +1,6 @@
 /**
- * PatientPage Component
- * Full CRUD interface for managing patient records.
+ * SupplierPage Component
+ * Full CRUD interface for managing supplier records.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -47,16 +47,16 @@ const CloseIcon = () => (
 // ============================================================
 // API Calls
 // ============================================================
-const fetchPatients = async () => {
-  const res = await fetch('/api/patients', {
+const fetchSuppliers = async () => {
+  const res = await fetch('/api/suppliers', {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
   });
-  if (!res.ok) throw new Error('Failed to fetch patients');
+  if (!res.ok) throw new Error('Failed to fetch suppliers');
   return res.json();
 };
 
-const createPatient = async (data) => {
-  const res = await fetch('/api/patients', {
+const createSupplier = async (data) => {
+  const res = await fetch('/api/suppliers', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -64,12 +64,12 @@ const createPatient = async (data) => {
     },
     body: JSON.stringify(data)
   });
-  if (!res.ok) throw new Error('Failed to create patient');
+  if (!res.ok) throw new Error('Failed to create supplier');
   return res.json();
 };
 
-const updatePatient = async (id, data) => {
-  const res = await fetch(`/api/patients/${id}`, {
+const updateSupplier = async (id, data) => {
+  const res = await fetch(`/api/suppliers/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -77,25 +77,25 @@ const updatePatient = async (id, data) => {
     },
     body: JSON.stringify(data)
   });
-  if (!res.ok) throw new Error('Failed to update patient');
+  if (!res.ok) throw new Error('Failed to update supplier');
   return res.json();
 };
 
-const deletePatient = async (id) => {
-  const res = await fetch(`/api/patients/${id}`, {
+const deleteSupplier = async (id) => {
+  const res = await fetch(`/api/suppliers/${id}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
   });
-  if (!res.ok) throw new Error('Failed to delete patient');
+  if (!res.ok) throw new Error('Failed to delete supplier');
   return res.json();
 };
 
 // ============================================================
 // Component
 // ============================================================
-export default function PatientPage() {
+export default function SupplierPage() {
   const { user } = useOutletContext();
-  const [patients, setPatients] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -105,35 +105,33 @@ export default function PatientPage() {
   
   // Form state
   const [formData, setFormData] = useState({
-    fullName: '',
-    age: '',
+    name: '',
+    contactPerson: '',
     phoneNumber: '',
-    gender: '',
-    bloodGroup: '',
-    fullAddress: '',
-    currentMedicine: '',
-    patientDisease: ''
+    email: '',
+    gstin: '',
+    address: '',
+    status: 'Active'
   });
   const [phoneWarning, setPhoneWarning] = useState('');
 
-  // Load patients
-  const loadPatients = useCallback(async () => {
+  // Load suppliers
+  const loadSuppliers = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await fetchPatients();
-      setPatients(data);
+      const data = await fetchSuppliers();
+      setSuppliers(data);
     } catch (err) {
       console.error(err);
-      // Fallback/Demo data if backend not fully up
-      setPatients([]);
+      setSuppliers([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadPatients();
-  }, [loadPatients]);
+    loadSuppliers();
+  }, [loadSuppliers]);
 
   // Handle phone change
   const handlePhoneChange = (e) => {
@@ -151,24 +149,23 @@ export default function PatientPage() {
   const handleAddClick = () => {
     setEditingId(null);
     setFormData({
-      fullName: '', age: '', phoneNumber: '', gender: '',
-      bloodGroup: '', fullAddress: '', currentMedicine: '', patientDisease: ''
+      name: '', contactPerson: '', phoneNumber: '', email: '',
+      gstin: '', address: '', status: 'Active'
     });
     setIsModalOpen(true);
   };
 
   // Open modal for edit
-  const handleEditClick = (patient) => {
-    setEditingId(patient._id);
+  const handleEditClick = (supplier) => {
+    setEditingId(supplier._id);
     setFormData({
-      fullName: patient.fullName,
-      age: patient.age,
-      phoneNumber: patient.phoneNumber,
-      gender: patient.gender || '',
-      bloodGroup: patient.bloodGroup || '',
-      fullAddress: patient.fullAddress || '',
-      currentMedicine: patient.currentMedicine || '',
-      patientDisease: patient.patientDisease || ''
+      name: supplier.name,
+      contactPerson: supplier.contactPerson || '',
+      phoneNumber: supplier.phoneNumber,
+      email: supplier.email || '',
+      gstin: supplier.gstin || '',
+      address: supplier.address || '',
+      status: supplier.status || 'Active'
     });
     setIsModalOpen(true);
   };
@@ -178,33 +175,34 @@ export default function PatientPage() {
     e.preventDefault();
     try {
       if (editingId) {
-        await updatePatient(editingId, formData);
+        await updateSupplier(editingId, formData);
       } else {
-        await createPatient(formData);
+        await createSupplier(formData);
       }
       setIsModalOpen(false);
-      loadPatients();
+      loadSuppliers();
     } catch (err) {
       alert(err.message);
     }
   };
 
-  // Delete patient
+  // Delete supplier
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this patient?')) {
+    if (window.confirm('Are you sure you want to delete this supplier?')) {
       try {
-        await deletePatient(id);
-        loadPatients();
+        await deleteSupplier(id);
+        loadSuppliers();
       } catch (err) {
         alert(err.message);
       }
     }
   };
 
-  // Filter patients
-  const filteredPatients = patients.filter(p => 
-    p.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.phoneNumber?.includes(searchQuery)
+  // Filter suppliers
+  const filteredSuppliers = suppliers.filter(s => 
+    s.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    s.phoneNumber?.includes(searchQuery) ||
+    s.gstin?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -212,13 +210,13 @@ export default function PatientPage() {
       {/* Header */}
       <div className="si-page-header">
         <div>
-          <h2 className="si-page-title">Patient Management</h2>
-          <p className="si-page-subtitle">View and manage patient records</p>
+          <h2 className="si-page-title">Supplier Management</h2>
+          <p className="si-page-subtitle">View and manage supplier/distributor records</p>
         </div>
         <div className="si-header-actions">
           <button className="si-btn si-btn-primary" onClick={handleAddClick}>
             <PlusIcon />
-            <span>Add Patient</span>
+            <span>Add Supplier</span>
           </button>
         </div>
       </div>
@@ -230,7 +228,7 @@ export default function PatientPage() {
           <input
             className="si-search-input"
             type="text"
-            placeholder="Search patients by name or phone..."
+            placeholder="Search suppliers by name, phone, or GSTIN..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -242,45 +240,44 @@ export default function PatientPage() {
         <table className="si-table">
           <thead>
             <tr>
-              <th className="si-th">Full Name</th>
-              <th className="si-th">Age</th>
+              <th className="si-th">Supplier Name</th>
+              <th className="si-th">Contact Person</th>
               <th className="si-th">Phone</th>
-              <th className="si-th">Address</th>
-              <th className="si-th">Gender / Blood</th>
-              <th className="si-th">Disease</th>
+              <th className="si-th">Email</th>
+              <th className="si-th">GSTIN</th>
+              <th className="si-th">Status</th>
               <th className="si-th" style={{ width: '180px', textAlign: 'center' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="7" className="si-empty-row">Loading patients...</td>
+                <td colSpan="7" className="si-empty-row">Loading suppliers...</td>
               </tr>
-            ) : filteredPatients.length === 0 ? (
+            ) : filteredSuppliers.length === 0 ? (
               <tr>
-                <td colSpan="7" className="si-empty-row">No patients found.</td>
+                <td colSpan="7" className="si-empty-row">No suppliers found.</td>
               </tr>
             ) : (
-              filteredPatients.map((patient) => (
-                <tr key={patient._id} className="si-table-row">
-                  <td className="si-td font-medium">{patient.fullName}</td>
-                  <td className="si-td">{patient.age}</td>
-                  <td className="si-td">{patient.phoneNumber}</td>
-                  <td className="si-td text-muted" title={patient.fullAddress}>
-                    {patient.fullAddress ? (patient.fullAddress.length > 30 ? patient.fullAddress.substring(0, 30) + '...' : patient.fullAddress) : '-'}
-                  </td>
+              filteredSuppliers.map((supplier) => (
+                <tr key={supplier._id} className="si-table-row">
+                  <td className="si-td font-medium">{supplier.name}</td>
+                  <td className="si-td">{supplier.contactPerson || '-'}</td>
+                  <td className="si-td">{supplier.phoneNumber}</td>
+                  <td className="si-td">{supplier.email || '-'}</td>
+                  <td className="si-td">{supplier.gstin || '-'}</td>
                   <td className="si-td">
-                    {patient.gender && <span>{patient.gender} </span>}
-                    {patient.bloodGroup && <span className="pt-badge">{patient.bloodGroup}</span>}
+                    <span className={`pt-badge ${supplier.status === 'Active' ? '' : 'pt-badge-inactive'}`} style={supplier.status !== 'Active' ? { backgroundColor: 'var(--color-danger)', color: '#fff' } : {}}>
+                      {supplier.status}
+                    </span>
                   </td>
-                  <td className="si-td text-muted">{patient.patientDisease || '-'}</td>
                   <td className="si-td">
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                      <button className="si-btn si-btn-outline si-btn-sm" onClick={() => handleEditClick(patient)}>
+                      <button className="si-btn si-btn-outline si-btn-sm" onClick={() => handleEditClick(supplier)}>
                         <EditIcon />
                         <span>Edit</span>
                       </button>
-                      <button className="si-btn si-btn-danger-outline si-btn-sm" onClick={() => handleDelete(patient._id)}>
+                      <button className="si-btn si-btn-danger-outline si-btn-sm" onClick={() => handleDelete(supplier._id)}>
                         <TrashIcon />
                         <span>Delete</span>
                       </button>
@@ -298,7 +295,7 @@ export default function PatientPage() {
         <div className="pt-modal-overlay">
           <div className="pt-modal">
             <div className="pt-modal-header">
-              <h3>{editingId ? 'Edit Patient' : 'Add New Patient'}</h3>
+              <h3>{editingId ? 'Edit Supplier' : 'Add New Supplier'}</h3>
               <button className="pt-modal-close" onClick={() => setIsModalOpen(false)}>
                 <CloseIcon />
               </button>
@@ -307,23 +304,20 @@ export default function PatientPage() {
             <form onSubmit={handleSubmit} className="pt-modal-body">
               <div className="si-field-row">
                 <div className="si-field" style={{ gridColumn: 'span 2' }}>
-                  <label className="si-label">Full Name *</label>
+                  <label className="si-label">Supplier Name *</label>
                   <input
                     required
                     className="si-input"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
                 </div>
                 <div className="si-field">
-                  <label className="si-label">Age *</label>
+                  <label className="si-label">Contact Person</label>
                   <input
-                    required
-                    type="number"
-                    min="0"
                     className="si-input"
-                    value={formData.age}
-                    onChange={(e) => setFormData({...formData, age: e.target.value})}
+                    value={formData.contactPerson}
+                    onChange={(e) => setFormData({...formData, contactPerson: e.target.value})}
                   />
                 </div>
               </div>
@@ -341,30 +335,34 @@ export default function PatientPage() {
                   {phoneWarning && <span className="si-field-warning">{phoneWarning}</span>}
                 </div>
                 <div className="si-field">
-                  <label className="si-label">Gender</label>
-                  <select 
+                  <label className="si-label">Email</label>
+                  <input
+                    type="email"
                     className="si-input"
-                    value={formData.gender}
-                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                  >
-                    <option value="">Select...</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="si-field-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <div className="si-field">
+                  <label className="si-label">GSTIN</label>
+                  <input
+                    className="si-input"
+                    value={formData.gstin}
+                    onChange={(e) => setFormData({...formData, gstin: e.target.value})}
+                  />
                 </div>
                 <div className="si-field">
-                  <label className="si-label">Blood Group</label>
+                  <label className="si-label">Status</label>
                   <select 
                     className="si-input"
-                    value={formData.bloodGroup}
-                    onChange={(e) => setFormData({...formData, bloodGroup: e.target.value})}
+                    value={formData.status}
+                    onChange={(e) => setFormData({...formData, status: e.target.value})}
                   >
-                    <option value="">Select...</option>
-                    <option value="A+">A+</option><option value="A-">A-</option>
-                    <option value="B+">B+</option><option value="B-">B-</option>
-                    <option value="AB+">AB+</option><option value="AB-">AB-</option>
-                    <option value="O+">O+</option><option value="O-">O-</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
                   </select>
                 </div>
               </div>
@@ -374,28 +372,9 @@ export default function PatientPage() {
                 <textarea
                   className="si-input"
                   rows="2"
-                  value={formData.fullAddress}
-                  onChange={(e) => setFormData({...formData, fullAddress: e.target.value})}
+                  value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
                 />
-              </div>
-
-              <div className="si-field-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <div className="si-field">
-                  <label className="si-label">Patient Disease</label>
-                  <input
-                    className="si-input"
-                    value={formData.patientDisease}
-                    onChange={(e) => setFormData({...formData, patientDisease: e.target.value})}
-                  />
-                </div>
-                <div className="si-field">
-                  <label className="si-label">Current Medicine</label>
-                  <input
-                    className="si-input"
-                    value={formData.currentMedicine}
-                    onChange={(e) => setFormData({...formData, currentMedicine: e.target.value})}
-                  />
-                </div>
               </div>
 
               <div className="pt-modal-footer">
@@ -403,7 +382,7 @@ export default function PatientPage() {
                   Cancel
                 </button>
                 <button type="submit" className="si-btn si-btn-primary">
-                  {editingId ? 'Update Patient' : 'Save Patient'}
+                  {editingId ? 'Update Supplier' : 'Save Supplier'}
                 </button>
               </div>
             </form>

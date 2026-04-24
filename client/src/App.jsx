@@ -9,7 +9,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import SalesInvoicePage from './pages/SalesInvoicePage';
+import PurchaseInvoicePage from './pages/PurchaseInvoicePage';
 import PatientPage from './pages/PatientPage';
+import SupplierPage from './pages/SupplierPage';
 import MainLayout from './components/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { performLogout } from './utils/auth';
@@ -84,7 +86,9 @@ export default function App() {
         >
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/sales-invoice" element={<SalesInvoicePage />} />
+          <Route path="/purchase-invoice" element={<PurchaseInvoicePage />} />
           <Route path="/patients" element={<PatientPage />} />
+          <Route path="/suppliers" element={<SupplierPage />} />
         </Route>
 
         {/* Catch-all: redirect to login */}
