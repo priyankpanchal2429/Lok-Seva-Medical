@@ -23,8 +23,9 @@ if (config.isProduction) {
 }
 
 // Connect to MongoDB
+const maskedUri = config.mongodbUri.replace(/:([^@]+)@/, ':****@').slice(-15);
 mongoose.connect(config.mongodbUri)
-  .then(() => console.log('✅ Connected to MongoDB'))
+  .then(() => console.log(`✅ Connected to MongoDB (Ending in: ...${maskedUri})`))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // ============================================================
