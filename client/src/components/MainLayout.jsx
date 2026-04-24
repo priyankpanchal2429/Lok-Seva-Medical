@@ -153,6 +153,24 @@ export default function MainLayout({ user }) {
         <div className="layout-header-inner">
           <div className="layout-header-left">
             <h1 className="layout-store-name">Lok Seva Medical Store</h1>
+
+            {/* Top Navigation */}
+            <nav className="layout-top-nav">
+              {NAV_ITEMS.map((item) => {
+                const isActive = location.pathname === item.path;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.key}
+                    className={`top-nav-item ${isActive ? 'active' : ''}`}
+                    onClick={() => navigate(item.path)}
+                  >
+                    <Icon />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
           <div className="layout-header-right">
             {/* Financial Year Dropdown */}
@@ -198,32 +216,10 @@ export default function MainLayout({ user }) {
         </div>
       </header>
 
-      {/* ===== Body: Left Nav + Main Content ===== */}
-      <div className="layout-body">
-        {/* Left Navigation */}
-        <nav className="layout-left-nav">
-          {NAV_ITEMS.map((item) => {
-            const isActive = location.pathname === item.path;
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.key}
-                className={`left-nav-item ${isActive ? 'active' : ''}`}
-                onClick={() => navigate(item.path)}
-                title={item.label}
-              >
-                <Icon />
-                <span className="left-nav-label">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Page Content Area */}
-        <main className="layout-main">
-          <Outlet context={{ user, financialYear }} />
-        </main>
-      </div>
+      {/* ===== Main Content (Full Width) ===== */}
+      <main className="layout-main">
+        <Outlet context={{ user, financialYear }} />
+      </main>
 
       {/* ===== User Profile Sidebar (Drawer) ===== */}
       <div 

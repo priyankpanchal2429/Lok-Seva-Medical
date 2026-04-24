@@ -552,7 +552,7 @@ body {
 .layout-header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 24px;
 }
 
 .layout-store-name {
@@ -560,6 +560,7 @@ body {
   font-weight: 600;
   color: var(--color-primary);
   letter-spacing: -0.3px;
+  white-space: nowrap;
 }
 
 .layout-header-right {
@@ -568,56 +569,44 @@ body {
   gap: 16px;
 }
 
-.layout-body {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
+/* ===== Top Navigation ===== */
 
-/* ===== Left Navigation ===== */
-
-.layout-left-nav {
-  width: 220px;
-  background-color: var(--color-surface);
-  border-right: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  padding: 12px 0;
-  flex-shrink: 0;
-  overflow-y: auto;
-}
-
-.left-nav-item {
+.layout-top-nav {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  margin: 2px 8px;
+  gap: 4px;
+}
+
+.top-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
   border-radius: 6px;
   background: none;
   border: none;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
-  text-align: left;
-  width: calc(100% - 16px);
+  white-space: nowrap;
 }
 
-.left-nav-item:hover {
+.top-nav-item svg {
+  width: 18px;
+  height: 18px;
+}
+
+.top-nav-item:hover {
   background-color: var(--color-bg);
   color: var(--color-text);
 }
 
-.left-nav-item.active {
+.top-nav-item.active {
   background-color: var(--color-primary-light);
   color: var(--color-primary);
   font-weight: 600;
-}
-
-.left-nav-label {
-  white-space: nowrap;
 }
 
 /* ===== Main Content Area ===== */
@@ -625,7 +614,6 @@ body {
 .layout-main {
   flex: 1;
   overflow-y: auto;
-  height: calc(100vh - 53px); /* viewport minus header */
   background-color: var(--color-bg);
 }
 
@@ -1060,16 +1048,13 @@ body {
   .si-field-row {
     grid-template-columns: 1fr;
   }
-  .layout-left-nav {
-    width: 56px;
-    padding: 12px 0;
-  }
-  .left-nav-label {
+  .top-nav-item span {
     display: none;
   }
-  .left-nav-item {
-    justify-content: center;
-    padding: 12px;
-    margin: 2px 4px;
+  .top-nav-item {
+    padding: 8px;
+  }
+  .layout-header-left {
+    gap: 12px;
   }
 }
