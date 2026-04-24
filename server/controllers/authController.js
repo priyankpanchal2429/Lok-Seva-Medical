@@ -146,6 +146,12 @@ async function login(req, res) {
     }
 
     // --- Find user in MongoDB ---
+    // Ensure DB is connected
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database not connected. Please try again in a moment.');
+    }
+
     const user = await User.findOne({ id: sanitizedUserId });
 
     if (!user) {

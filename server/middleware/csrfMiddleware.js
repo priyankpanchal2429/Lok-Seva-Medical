@@ -32,8 +32,9 @@ function csrfMiddleware(req, res, next) {
     return next();
   }
 
-  // Skip login route (no CSRF cookie exists yet before first login)
-  if (req.originalUrl === '/api/auth/login' || req.originalUrl.startsWith('/api/auth/login?')) {
+  // Skip login route (where token is first generated)
+  // Check if it ends with /auth/login to be robust against prefix variations
+  if (req.originalUrl.endsWith('/auth/login')) {
     return next();
   }
 
