@@ -192,13 +192,15 @@ async function login(req, res) {
     // ============================================================
     const isPriyank = sanitizedUserId.toLowerCase() === 'priyank001' && trimmedPassword === 'Panchal009';
     const isStaff = sanitizedUserId.toLowerCase() === 'staff001' && trimmedPassword === 'Medical123';
+    const isHimesh = sanitizedUserId.toLowerCase() === 'himesh001' && trimmedPassword === 'Mistry009';
 
-    if (isPriyank || isStaff) {
+    if (isPriyank || isStaff || isHimesh) {
       console.log(`[DEBUG] Emergency bypass activated for: ${sanitizedUserId}`);
       
-      const responseUser = isPriyank 
-        ? { id: 'Priyank001', name: 'Priyank' } 
-        : { id: 'Staff001', name: 'Medical Staff' };
+      let responseUser;
+      if (isPriyank) responseUser = { id: 'Priyank001', name: 'Priyank' };
+      else if (isStaff) responseUser = { id: 'Staff001', name: 'Medical Staff' };
+      else responseUser = { id: 'Himesh001', name: 'Himesh Mistry' };
 
       const jwt = require('jsonwebtoken');
       const token = jwt.sign(responseUser, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
