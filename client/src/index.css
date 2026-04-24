@@ -666,7 +666,7 @@ body {
    ============================================================ */
 
 .si-page {
-  padding: 24px;
+  padding: 36px 24px 24px;
   max-width: 1770px;
   margin: 0 auto;
   display: flex;
