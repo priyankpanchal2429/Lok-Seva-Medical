@@ -131,7 +131,7 @@ function CalendarMock({ month, year, selectedDay, rangeStart, rangeEnd }) {
                 ...styles.dayCell,
                 backgroundColor: isSelected ? 'var(--color-primary)' : (isInRange ? 'rgba(0, 204, 153, 0.08)' : 'transparent'),
                 color: isSelected ? '#fff' : (isInRange ? 'var(--color-text)' : 'var(--color-text-secondary)'),
-                borderRadius: isSelected ? '6px' : '0px',
+                borderRadius: isSelected ? '4px' : '0px',
                 fontWeight: isSelected ? 600 : 400,
               }}
             >
@@ -156,43 +156,43 @@ const styles = {
   },
   container: {
     position: 'absolute',
-    top: '110px',
+    top: '150px', // Pushed lower so it doesn't block the button
     right: '24px',
     backgroundColor: 'var(--color-surface)',
-    borderRadius: '8px',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.4)',
-    width: '680px',
+    borderRadius: '6px',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
+    width: '540px', // Even smaller width
     overflow: 'visible',
     border: '1px solid var(--color-border)',
     color: 'var(--color-text)',
   },
   arrow: {
-    display: 'none', // Removed arrow to match screenshot better
+    display: 'none',
   },
   main: {
     display: 'flex',
   },
   sidebar: {
-    width: '160px',
+    width: '130px', // Reduced sidebar width
     borderRight: '1px solid var(--color-border)',
-    padding: '16px 0',
-    backgroundColor: 'var(--color-surface)', // Match container
+    padding: '12px 0',
+    backgroundColor: 'var(--color-surface)',
   },
   presetItem: {
-    padding: '10px 24px',
-    fontSize: '14px',
+    padding: '8px 16px',
+    fontSize: '12px',
     cursor: 'pointer',
     transition: 'background-color 0.2s',
   },
   calendarSection: {
     flex: 1,
-    padding: '24px 32px',
+    padding: '16px 20px',
     backgroundColor: 'var(--color-surface)',
   },
   calendarGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '32px',
+    gap: '24px', // Reduced gap between calendars
   },
   calendar: {
     width: '100%',
@@ -201,13 +201,13 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '16px',
+    marginBottom: '12px',
   },
   headerDate: {
     display: 'flex',
-    gap: '16px',
-    fontSize: '14px',
-    fontWeight: 500,
+    gap: '12px',
+    fontSize: '13px',
+    fontWeight: 600,
     color: 'var(--color-text)',
   },
   datePart: {
@@ -225,20 +225,20 @@ const styles = {
     border: 'none',
     color: 'var(--color-text)',
     cursor: 'pointer',
-    padding: '4px',
+    padding: '2px',
     display: 'flex',
     alignItems: 'center',
   },
   dayHeaderGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(7, 1fr)',
-    marginBottom: '12px',
+    marginBottom: '8px',
   },
   dayName: {
     textAlign: 'center',
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#fff', // White headers as in screenshot
+    fontSize: '11px',
+    fontWeight: 600,
+    color: '#fff',
   },
   daysGrid: {
     display: 'grid',
@@ -246,28 +246,28 @@ const styles = {
     rowGap: '2px',
   },
   dayCell: {
-    height: '34px',
+    height: '28px', // Smaller cells
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '13px',
+    fontSize: '12px',
     cursor: 'pointer',
   },
   footer: {
-    padding: '16px 32px',
+    padding: '12px 20px',
     borderTop: '1px solid var(--color-border)',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'var(--color-surface)', // Match container
+    backgroundColor: 'var(--color-surface)',
   },
   rangeDisplay: {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: 500,
     color: 'var(--color-text)',
   },
   actions: {
     display: 'flex',
-    gap: '12px',
+    gap: '8px',
   }
 };
