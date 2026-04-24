@@ -69,7 +69,6 @@ export default function App() {
       <Routes>
         {/* Login route */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
 
         {/* Protected dashboard route */}
         <Route
