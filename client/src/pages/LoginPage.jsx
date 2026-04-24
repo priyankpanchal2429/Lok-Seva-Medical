@@ -73,18 +73,21 @@ export default function LoginPage() {
     setStatus({ type: '', message: '' });
 
     const { userId, password, name, confirmPassword, answer1, answer2 } = formData;
-    const sanitizedUserId = sanitizeInput(userId).trim();
+    const sanitizedUserId = sanitizeInput(userId);
 
     try {
       if (mode === 'login') {
         // LOGIN FLOW
-        if (!userId || !password) {
+        if (isEmpty(userId) || isEmpty(password)) {
           setStatus({ type: 'error', message: 'User ID and Password are required.' });
           setIsSubmitting(false);
           return;
         }
 
-        const response = await api.post('/auth/login', { userId: sanitizedUserId, password });
+        const response = await api.post('/auth/login', { 
+          userId: sanitizedUserId, 
+          password: password.trim() 
+        });
         if (response.data.token) localStorage.setItem('lok-seva-token', response.data.token);
         
         if (rememberMe) localStorage.setItem('lok-seva-remembered-user', sanitizedUserId);
