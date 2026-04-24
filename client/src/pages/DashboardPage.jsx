@@ -32,53 +32,57 @@ export default function DashboardPage({ user }) {
     <div style={styles.container}>
       {/* ===== Top Bar ===== */}
       <header style={styles.header}>
-        <div style={styles.headerLeft}>
-          <h1 style={styles.storeName}>Lok Seva Medical Store</h1>
-        </div>
-        <div style={styles.headerRight}>
-          {/* Financial Year Selector */}
-          <div className="fy-selector-container">
-            <span className="fy-label">F.Y.</span>
-            <select 
-              className="fy-select"
-              value={financialYear}
-              onChange={(e) => setFinancialYear(e.target.value)}
-            >
-              <option value="2026-27">2026-2027</option>
-              <option value="2025-26">2025-2026</option>
-              <option value="2024-25">2024-2025</option>
-              <option value="2023-24">2023-2024</option>
-            </select>
+        <div style={styles.headerInner}>
+          <div style={styles.headerLeft}>
+            <h1 style={styles.storeName}>Lok Seva Medical Store</h1>
           </div>
+          <div style={styles.headerRight}>
+            {/* Financial Year Selector */}
+            <div className="fy-selector-container">
+              <span className="fy-label">F.Y.</span>
+              <select 
+                className="fy-select"
+                value={financialYear}
+                onChange={(e) => setFinancialYear(e.target.value)}
+              >
+                <option value="2026-27">2026-2027</option>
+                <option value="2025-26">2025-2026</option>
+                <option value="2024-25">2024-2025</option>
+                <option value="2023-24">2023-2024</option>
+              </select>
+            </div>
 
-          <ThemeToggle />
-          <button
-            id="logout-button"
-            type="button"
-            onClick={handleLogout}
-            style={styles.logoutButton}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-error)';
-              e.currentTarget.style.color = '#FFFFFF';
-              e.currentTarget.style.borderColor = 'var(--color-error)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = 'var(--color-error)';
-              e.currentTarget.style.borderColor = 'var(--color-error)';
-            }}
-          >
-            Logout
-          </button>
+            <ThemeToggle />
+            <button
+              id="logout-button"
+              type="button"
+              onClick={handleLogout}
+              style={styles.logoutButton}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-error)';
+                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.borderColor = 'var(--color-error)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--color-error)';
+                e.currentTarget.style.borderColor = 'var(--color-error)';
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
       {/* ===== Main Content ===== */}
       <main style={styles.main}>
-        <div style={styles.welcomeCard}>
-          <p style={styles.greeting}>Welcome,</p>
-          <h2 style={styles.userName}>{displayName}</h2>
-          <p style={styles.userIdText}>ID: {user?.id}</p>
+        <div style={styles.mainInner}>
+          <div style={styles.welcomeCard}>
+            <p style={styles.greeting}>Welcome,</p>
+            <h2 style={styles.userName}>{displayName}</h2>
+            <p style={styles.userIdText}>ID: {user?.id}</p>
+          </div>
         </div>
       </main>
     </div>
@@ -99,12 +103,19 @@ const styles = {
 
   // ----- Header -----
   header: {
+    backgroundColor: 'var(--color-surface)',
+    borderBottom: '1px solid var(--color-border)',
+    display: 'flex',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  headerInner: {
+    width: '100%',
+    maxWidth: '1770px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '16px 24px',
-    backgroundColor: 'var(--color-surface)',
-    borderBottom: '1px solid var(--color-border)',
   },
   headerLeft: {
     display: 'flex',
@@ -142,6 +153,14 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '24px',
+    width: '100%',
+  },
+  mainInner: {
+    width: '100%',
+    maxWidth: '1770px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   welcomeCard: {
     textAlign: 'center',
