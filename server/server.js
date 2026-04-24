@@ -35,11 +35,10 @@ mongoose.connect(config.mongodbUri)
 // Helmet — sets various HTTP security headers
 app.use(helmet());
 
-// CORS — allow frontend origin with credentials
+// CORS — Allow all origins temporarily for debugging cross-domain issues
 app.use(cors({
-  origin: config.clientUrl,
-  credentials: true,
-  optionsSuccessStatus: 200, // For legacy browser compatibility
+  origin: '*',
+  optionsSuccessStatus: 200, 
 }));
 
 // Rate limiting — global

@@ -17,7 +17,9 @@ export default function ProtectedRoute({ children, onAuthResolved }) {
     let cancelled = false;
 
     async function verify() {
+      console.log('[DEBUG] Verifying session...');
       const authUser = await checkAuth();
+      console.log('[DEBUG] Session verification result:', authUser ? `User ${authUser.id}` : 'No user found');
 
       if (cancelled) return;
 
