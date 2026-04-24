@@ -125,7 +125,7 @@ export default function DashboardPage({ user }) {
 
               {isFYDropdownOpen && (
                 <div className="fy-dropdown-menu">
-                  {['2026-2027', '2025-2026', '2024-2025', '2023-2024', '2022-2023', '2021-2022', '2020-2021', '2019-2020', '2018-2019', '2017-2018'].map((year) => (
+                  {['2026-2027', '2027-2028', '2028-2029', '2029-2030', '2030-2031', '2031-2032'].map((year) => (
                     <button
                       key={year}
                       className={`fy-dropdown-item ${financialYear === year ? 'active' : ''}`}
