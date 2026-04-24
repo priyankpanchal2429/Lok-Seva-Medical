@@ -8,7 +8,7 @@ import axios from 'axios';
 /** Axios instance with defaults for API communication */
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
-  withCredentials: true, // Send cookies with every request
+  withCredentials: false, // Using Authorization headers instead of cookies
   headers: {
     'Content-Type': 'application/json',
   },

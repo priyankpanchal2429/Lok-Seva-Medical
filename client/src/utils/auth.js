@@ -21,15 +21,17 @@ export async function checkAuth() {
 }
 
 /**
- * Log the user out by calling the server and clearing cookies.
+ * Log the user out by clearing the token and calling the server.
  * @returns {Promise<boolean>} True if logout was successful
  */
 export async function performLogout() {
   try {
+    localStorage.removeItem('lok-seva-token');
     await api.post('/auth/logout');
     return true;
   } catch {
-    // Even if API fails, redirect to login
+    // Even if API fails, clear token locally and redirect to login
+    localStorage.removeItem('lok-seva-token');
     return false;
   }
 }
