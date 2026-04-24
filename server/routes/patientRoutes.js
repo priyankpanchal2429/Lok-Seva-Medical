@@ -6,14 +6,14 @@ const {
   updatePatient,
   deletePatient,
 } = require('../controllers/patientController');
-const { protect } = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
 router.route('/')
-  .get(protect, getPatients)
-  .post(protect, createPatient);
+  .get(authMiddleware, getPatients)
+  .post(authMiddleware, createPatient);
 
 router.route('/:id')
-  .put(protect, updatePatient)
-  .delete(protect, deletePatient);
+  .put(authMiddleware, updatePatient)
+  .delete(authMiddleware, deletePatient);
 
 module.exports = router;
