@@ -174,7 +174,10 @@ async function login(req, res) {
     console.log(`[AUTH] User "${user.id}" found. Verifying password...`);
 
     // --- Verify password ---
-    const isValid = await comparePassword(password, user.passwordHash);
+    const trimmedPassword = password.trim();
+    console.log(`[DEBUG] Received password length: ${password.length} (Trimmed: ${trimmedPassword.length})`);
+    
+    const isValid = await comparePassword(trimmedPassword, user.passwordHash);
 
     if (!isValid) {
       recordFailedAttempt(sanitizedUserId);
