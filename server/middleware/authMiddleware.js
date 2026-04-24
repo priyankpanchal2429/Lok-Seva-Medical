@@ -15,17 +15,19 @@ function authMiddleware(req, res, next) {
   // Extract token from Authorization header or cookies
   let token = req.cookies?.token;
   
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization || req.headers.Authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     token = authHeader.split(' ')[1];
   }
 
   if (!token) {
+    console.log('[AUTH] No token found in request headers or cookies.');
     return res.status(401).json({ error: 'Authentication required. Please log in.' });
   }
 
   try {
     const decoded = jwt.verify(token, config.jwt.secret);
+    console.log(`[AUTH] Token verified for user: ${decoded.id}`);
     req.user = { id: decoded.id, name: decoded.name };
 
     logAuthEvent('AUTH_CHECK', {
@@ -36,7 +38,9 @@ function authMiddleware(req, res, next) {
 
     next();
   } catch (error) {
-    // Clear invalid/expired token
+    console.error('[AUTH] Token verification failed:', error.message);
+    
+    // Clear invalid/expired token if using cookies
     res.clearCookie('token');
     res.clearCookie('csrf-token');
 
