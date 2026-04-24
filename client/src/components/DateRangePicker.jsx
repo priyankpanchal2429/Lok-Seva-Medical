@@ -1,15 +1,88 @@
 /**
  * DateRangePicker Component
- * Refined popover-style date range selector matching the high-fidelity reference.
+ * Fully functional, compact popover-style date range selector matching the high-fidelity reference.
  */
 
 import { useState, useEffect, useRef } from 'react';
 
+// --- Utility Functions ---
+
+const parseDateString = (str) => {
+  if (!str) return null;
+  const [day, month, year] = str.split('-');
+  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+};
+
+const formatDateString = (date) => {
+  if (!date) return '';
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = date.getFullYear();
+  return `${d}-${m}-${y}`;
+};
+
+const isSameDay = (d1, d2) => {
+  return d1 && d2 && d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
+};
+
+const isBeforeDay = (d1, d2) => {
+  if (!d1 || !d2) return false;
+  const d1Copy = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+  const d2Copy = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate());
+  return d1Copy < d2Copy;
+};
+
+const isAfterDay = (d1, d2) => {
+  if (!d1 || !d2) return false;
+  const d1Copy = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+  const d2Copy = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate());
+  return d1Copy > d2Copy;
+};
+
+const getDaysInMonth = (year, month) => {
+  return new Date(year, month + 1, 0).getDate();
+};
+
+const getFirstDayOfMonth = (year, month) => {
+  const day = new Date(year, month, 1).getDay();
+  return day === 0 ? 6 : day - 1; // Map Sunday (0) to 6, Monday (1) to 0, etc.
+};
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// --- Component ---
+
 export default function DateRangePicker({ isOpen, onClose, onApply, initialRange }) {
   const modalRef = useRef(null);
-  const [startDate, setStartDate] = useState(initialRange?.start || '24-10-2025');
-  const [endDate, setEndDate] = useState(initialRange?.end || '24-04-2026');
   
+  // Real Date objects
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [hoverDate, setHoverDate] = useState(null);
+  
+  // Active preset
+  const [activePreset, setActivePreset] = useState('');
+
+  // Calendar View State (left calendar month/year)
+  const [viewDate, setViewDate] = useState(new Date());
+
+  // Initialize from props
+  useEffect(() => {
+    if (isOpen) {
+      if (initialRange?.start && initialRange?.end) {
+        const start = parseDateString(initialRange.start);
+        const end = parseDateString(initialRange.end);
+        setStartDate(start);
+        setEndDate(end);
+        // Show the month of the start date
+        setViewDate(new Date(start.getFullYear(), start.getMonth(), 1));
+      } else {
+        const today = new Date();
+        setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
+      }
+    }
+  }, [isOpen, initialRange]);
+
   // Close on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -18,10 +91,119 @@ export default function DateRangePicker({ isOpen, onClose, onApply, initialRange
       }
     };
     if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  // --- Handlers ---
+
+  const handleDayClick = (date) => {
+    setActivePreset('');
+    if (!startDate || (startDate && endDate)) {
+      setStartDate(date);
+      setEndDate(null);
+    } else if (startDate && !endDate) {
+      if (isBeforeDay(date, startDate)) {
+        setStartDate(date);
+      } else {
+        setEndDate(date);
+      }
+    }
+  };
+
+  const handleDayMouseEnter = (date) => {
+    if (startDate && !endDate) {
+      setHoverDate(date);
+    }
+  };
+
+  const handleMouseLeaveGrid = () => {
+    setHoverDate(null);
+  };
+
+  const handlePrevMonth = () => {
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
+  };
+
+  const applyPreset = (presetName) => {
+    const today = new Date();
+    let start = null;
+    let end = null;
+    
+    switch (presetName) {
+      case 'Today':
+        start = new Date();
+        end = new Date();
+        break;
+      case 'Yesterday':
+        start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+        end = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+        break;
+      case 'Last 7 Days':
+        start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+        end = new Date();
+        break;
+      case 'Last 30 Days':
+        start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29);
+        end = new Date();
+        break;
+      case 'Last Month':
+        start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        end = new Date(today.getFullYear(), today.getMonth(), 0);
+        break;
+      case 'Last 3 Month':
+        start = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
+        end = new Date();
+        break;
+      case 'Last 6 Month':
+        start = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
+        end = new Date();
+        break;
+      case 'Last 1 Year':
+        start = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+        end = new Date();
+        break;
+      case 'Current Month':
+        start = new Date(today.getFullYear(), today.getMonth(), 1);
+        end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        break;
+      case 'Current F.Y.':
+        const currentMonth = today.getMonth();
+        const startYear = currentMonth >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+        start = new Date(startYear, 3, 1); // April 1st
+        end = new Date(startYear + 1, 2, 31); // March 31st
+        break;
+      default:
+        break;
+    }
+
+    if (start && end) {
+      setStartDate(start);
+      setEndDate(end);
+      setViewDate(new Date(start.getFullYear(), start.getMonth(), 1));
+      setActivePreset(presetName);
+    }
+  };
+
+  const handleApply = () => {
+    if (startDate) {
+      // If no end date selected, treat it as a single day range
+      const endToApply = endDate || startDate;
+      onApply(formatDateString(startDate), formatDateString(endToApply));
+    }
+  };
+
+  // --- Render Helpers ---
+  const leftMonth = viewDate.getMonth();
+  const leftYear = viewDate.getFullYear();
+  const rightDate = new Date(leftYear, leftMonth + 1, 1);
+  const rightMonth = rightDate.getMonth();
+  const rightYear = rightDate.getFullYear();
 
   const presets = [
     'Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days', 'Last Month',
@@ -31,44 +213,61 @@ export default function DateRangePicker({ isOpen, onClose, onApply, initialRange
   return (
     <div style={styles.popoverOverlay}>
       <div ref={modalRef} style={styles.container}>
-        {/* Popover Arrow */}
-        <div style={styles.arrow}></div>
-
         <div style={styles.main}>
           {/* Left Sidebar Presets */}
           <div style={styles.sidebar}>
-            {presets.map((preset, idx) => (
-              <div key={preset} style={{
-                ...styles.presetItem,
-                color: idx === 0 ? '#fff' : 'var(--color-text-secondary)',
-                fontWeight: idx === 0 ? 600 : 400
-              }}>
-                {preset}
-              </div>
-            ))}
+            {presets.map(preset => {
+              const isActive = preset === activePreset;
+              return (
+                <div 
+                  key={preset} 
+                  onClick={() => applyPreset(preset)}
+                  style={{
+                    ...styles.presetItem,
+                    color: isActive ? '#fff' : 'var(--color-text-secondary)',
+                    fontWeight: isActive ? 600 : 400
+                  }}
+                >
+                  {preset}
+                </div>
+              );
+            })}
           </div>
 
           {/* Calendars Section */}
-          <div style={styles.calendarSection}>
+          <div style={styles.calendarSection} onMouseLeave={handleMouseLeaveGrid}>
             <div style={styles.calendarGrid}>
-              {/* Oct 2025 */}
-              <CalendarMock 
-                month="Oct" 
-                year="2025" 
-                selectedDay={24} 
-                rangeStart={25} 
-                rangeEnd={31}
-                showRangeEndFade
+              
+              {/* Left Calendar */}
+              <Calendar 
+                monthIdx={leftMonth} 
+                year={leftYear} 
+                startDate={startDate}
+                endDate={endDate}
+                hoverDate={hoverDate}
+                onDayClick={handleDayClick}
+                onDayMouseEnter={handleDayMouseEnter}
+                onPrevMonth={handlePrevMonth}
+                onNextMonth={handleNextMonth}
+                showPrev={true}
+                showNext={true}
               />
-              {/* Apr 2026 */}
-              <CalendarMock 
-                month="Apr" 
-                year="2026" 
-                selectedDay={24} 
-                rangeStart={1} 
-                rangeEnd={23} 
-                showRangeStartFade
+
+              {/* Right Calendar */}
+              <Calendar 
+                monthIdx={rightMonth} 
+                year={rightYear} 
+                startDate={startDate}
+                endDate={endDate}
+                hoverDate={hoverDate}
+                onDayClick={handleDayClick}
+                onDayMouseEnter={handleDayMouseEnter}
+                onPrevMonth={handlePrevMonth}
+                onNextMonth={handleNextMonth}
+                showPrev={true}
+                showNext={true}
               />
+
             </div>
           </div>
         </div>
@@ -76,13 +275,27 @@ export default function DateRangePicker({ isOpen, onClose, onApply, initialRange
         {/* Footer */}
         <div style={styles.footer}>
           <div style={styles.rangeDisplay}>
-            {startDate} To {endDate}
+            {startDate ? formatDateString(startDate) : 'Select Start'} 
+            {' To '} 
+            {endDate ? formatDateString(endDate) : (startDate ? formatDateString(startDate) : 'Select End')}
           </div>
           <div style={styles.actions}>
             <button className="si-btn si-btn-secondary" onClick={onClose} style={{ borderRadius: '6px', padding: '8px 24px', fontSize: '13px', background: '#fff', color: '#000', border: 'none' }}>
               Cancel
             </button>
-            <button className="si-btn si-btn-primary" onClick={() => onApply(startDate, endDate)} style={{ borderRadius: '6px', padding: '8px 24px', fontSize: '13px', fontWeight: 600, backgroundColor: 'var(--color-primary)' }}>
+            <button 
+              className="si-btn si-btn-primary" 
+              onClick={handleApply} 
+              disabled={!startDate}
+              style={{ 
+                borderRadius: '6px', 
+                padding: '8px 24px', 
+                fontSize: '13px', 
+                fontWeight: 600, 
+                backgroundColor: startDate ? 'var(--color-primary)' : 'var(--color-border)',
+                opacity: startDate ? 1 : 0.5
+              }}
+            >
               Apply
             </button>
           </div>
@@ -92,45 +305,66 @@ export default function DateRangePicker({ isOpen, onClose, onApply, initialRange
   );
 }
 
-function CalendarMock({ month, year, selectedDay, rangeStart, rangeEnd }) {
-  const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-  const emptyCells = month === 'Oct' ? 2 : 0; // Simplified padding for Oct
+function Calendar({ monthIdx, year, startDate, endDate, hoverDate, onDayClick, onDayMouseEnter, onPrevMonth, onNextMonth, showPrev, showNext }) {
+  const daysOfWeek = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const monthName = MONTH_NAMES[monthIdx];
+  const numDays = getDaysInMonth(year, monthIdx);
+  const firstDay = getFirstDayOfMonth(year, monthIdx);
 
   return (
     <div style={styles.calendar}>
       <div style={styles.calendarHeader}>
-        <button style={styles.navBtn}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <button style={{...styles.navBtn, visibility: showPrev ? 'visible' : 'hidden'}} onClick={onPrevMonth}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
         <div style={styles.headerDate}>
-          <span style={styles.datePart}>{month} <span style={styles.arrowIcon}>↕</span></span>
+          <span style={styles.datePart}>{monthName} <span style={styles.arrowIcon}>↕</span></span>
           <span style={styles.datePart}>{year} <span style={styles.arrowIcon}>↕</span></span>
         </div>
-        <button style={styles.navBtn}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <button style={{...styles.navBtn, visibility: showNext ? 'visible' : 'hidden'}} onClick={onNextMonth}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
 
       <div style={styles.dayHeaderGrid}>
-        {days.map(d => <div key={d} style={styles.dayName}>{d}</div>)}
+        {daysOfWeek.map(d => <div key={d} style={styles.dayName}>{d}</div>)}
       </div>
 
       <div style={styles.daysGrid}>
-        {/* Empty cells for start of month */}
-        {Array.from({ length: emptyCells }).map((_, i) => <div key={`e-${i}`} />)}
+        {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
         
-        {Array.from({ length: 31 }).map((_, i) => {
+        {Array.from({ length: numDays }).map((_, i) => {
           const day = i + 1;
-          const isInRange = day >= rangeStart && day <= rangeEnd;
-          const isSelected = day === selectedDay;
+          const currentDate = new Date(year, monthIdx, day);
           
+          const isSelectedStart = isSameDay(currentDate, startDate);
+          const isSelectedEnd = isSameDay(currentDate, endDate);
+          const isSelected = isSelectedStart || isSelectedEnd;
+
+          // Determine if day is in range
+          let isInRange = false;
+          if (startDate && endDate) {
+            isInRange = (isAfterDay(currentDate, startDate) || isSameDay(currentDate, startDate)) && 
+                        (isBeforeDay(currentDate, endDate) || isSameDay(currentDate, endDate));
+          } else if (startDate && hoverDate) {
+            const rangeStart = isBeforeDay(startDate, hoverDate) ? startDate : hoverDate;
+            const rangeEnd = isBeforeDay(startDate, hoverDate) ? hoverDate : startDate;
+            isInRange = (isAfterDay(currentDate, rangeStart) || isSameDay(currentDate, rangeStart)) && 
+                        (isBeforeDay(currentDate, rangeEnd) || isSameDay(currentDate, rangeEnd));
+          }
+          
+          const isEdge = isSelectedStart || isSelectedEnd || (startDate && isSameDay(currentDate, hoverDate));
+          const shouldHighlight = isInRange && !isEdge;
+
           return (
             <div 
-              key={i} 
+              key={day} 
+              onClick={() => onDayClick(currentDate)}
+              onMouseEnter={() => onDayMouseEnter(currentDate)}
               style={{
                 ...styles.dayCell,
-                backgroundColor: isSelected ? 'var(--color-primary)' : (isInRange ? 'rgba(0, 204, 153, 0.08)' : 'transparent'),
-                color: isSelected ? '#fff' : (isInRange ? 'var(--color-text)' : 'var(--color-text-secondary)'),
+                backgroundColor: isSelected ? 'var(--color-primary)' : (shouldHighlight ? 'rgba(0, 204, 153, 0.08)' : 'transparent'),
+                color: isSelected ? '#fff' : (shouldHighlight ? 'var(--color-text)' : 'var(--color-text-secondary)'),
                 borderRadius: isSelected ? '4px' : '0px',
                 fontWeight: isSelected ? 600 : 400,
               }}
@@ -156,24 +390,21 @@ const styles = {
   },
   container: {
     position: 'absolute',
-    top: '150px', // Pushed lower so it doesn't block the button
-    right: '24px',
+    top: '150px',
+    right: '80px', // Moved a bit to the left
     backgroundColor: 'var(--color-surface)',
     borderRadius: '6px',
     boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
-    width: '540px', // Even smaller width
+    width: '560px', // Compact width
     overflow: 'visible',
     border: '1px solid var(--color-border)',
     color: 'var(--color-text)',
-  },
-  arrow: {
-    display: 'none',
   },
   main: {
     display: 'flex',
   },
   sidebar: {
-    width: '130px', // Reduced sidebar width
+    width: '130px', 
     borderRight: '1px solid var(--color-border)',
     padding: '12px 0',
     backgroundColor: 'var(--color-surface)',
@@ -192,7 +423,7 @@ const styles = {
   calendarGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '24px', // Reduced gap between calendars
+    gap: '24px', 
   },
   calendar: {
     width: '100%',
@@ -246,7 +477,7 @@ const styles = {
     rowGap: '2px',
   },
   dayCell: {
-    height: '28px', // Smaller cells
+    height: '28px', 
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
