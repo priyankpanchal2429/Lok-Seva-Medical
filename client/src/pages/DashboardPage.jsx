@@ -155,8 +155,10 @@ export default function DashboardPage({ user }) {
           <div className="sidebar-avatar-large">
             {displayName.charAt(0).toUpperCase()}
           </div>
-          <h3 className="sidebar-name">{displayName}</h3>
-          <span className="sidebar-role-badge">{role}</span>
+          <div className="sidebar-profile-info">
+            <h3 className="sidebar-name">{displayName}</h3>
+            <span className="sidebar-role-badge">{role}</span>
+          </div>
         </div>
 
         <div className="sidebar-menu">
