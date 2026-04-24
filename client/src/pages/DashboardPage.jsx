@@ -75,51 +75,57 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="dash-grid-cards">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '24px' }}>
         {/* Total Sales Card */}
-        <div className="dash-kpi-card" style={{ borderTop: '4px solid var(--color-primary)' }}>
-          <div className="dash-kpi-header">
-            <h3 className="dash-kpi-title">Total Sales</h3>
-            <div className="dash-kpi-icon" style={{ backgroundColor: 'rgba(0, 204, 153, 0.1)', color: 'var(--color-primary)' }}>
+        <div className="si-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-muted)' }}>Total Sales</h3>
+            <div style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 204, 153, 0.1)', color: 'var(--color-primary)' }}>
               <CurrencyRupeeIcon />
             </div>
           </div>
-          <div className="dash-kpi-value">₹ {data.totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-          <div className="dash-kpi-footer text-muted">Current Financial Year</div>
+          <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--color-text)', marginTop: '8px' }}>
+            ₹ {data.totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </div>
+          <div style={{ fontSize: '13px', marginTop: 'auto', color: 'var(--color-text-muted)' }}>Current Financial Year</div>
         </div>
 
         {/* Expiring Medicines Card */}
-        <div className="dash-kpi-card" style={{ borderTop: '4px solid var(--color-warning)' }}>
-          <div className="dash-kpi-header">
-            <h3 className="dash-kpi-title">Expiring in 7 Days</h3>
-            <div className="dash-kpi-icon" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning)' }}>
+        <div className="si-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-muted)' }}>Expiring in 7 Days</h3>
+            <div style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning)' }}>
               <AlertTriangleIcon />
             </div>
           </div>
-          <div className="dash-kpi-value">{data.expiringMedicines.length} Items</div>
-          <div className="dash-kpi-footer" style={{ color: 'var(--color-warning)' }}>Requires immediate attention</div>
+          <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--color-text)', marginTop: '8px' }}>
+            {data.expiringMedicines.length} Items
+          </div>
+          <div style={{ fontSize: '13px', marginTop: 'auto', color: 'var(--color-warning)' }}>Requires immediate attention</div>
         </div>
 
         {/* Low Stock Card */}
-        <div className="dash-kpi-card" style={{ borderTop: '4px solid var(--color-danger)' }}>
-          <div className="dash-kpi-header">
-            <h3 className="dash-kpi-title">Low Stock (Under 2)</h3>
-            <div className="dash-kpi-icon" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-danger)' }}>
+        <div className="si-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-muted)' }}>Low Stock (Under 2)</h3>
+            <div style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-danger)' }}>
               <PackageIcon />
             </div>
           </div>
-          <div className="dash-kpi-value">{data.lowStockMedicines.length} Items</div>
-          <div className="dash-kpi-footer" style={{ color: 'var(--color-danger)' }}>Needs reordering</div>
+          <div style={{ fontSize: '32px', fontWeight: 700, color: 'var(--color-text)', marginTop: '8px' }}>
+            {data.lowStockMedicines.length} Items
+          </div>
+          <div style={{ fontSize: '13px', marginTop: 'auto', color: 'var(--color-danger)' }}>Needs reordering</div>
         </div>
       </div>
 
       {/* Data Tables */}
-      <div className="dash-grid-tables">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
         
         {/* Expiring Medicines Table */}
-        <div className="si-card">
-          <div className="dash-card-header">
-            <h3 className="dash-card-title">Expiring Medicines</h3>
+        <div className="si-card si-table-card" style={{ marginBottom: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--color-border)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text)' }}>Expiring Medicines</h3>
             <button className="si-btn si-btn-outline si-btn-sm" onClick={() => navigate('/purchase-invoice')}>
               Review Stock
             </button>
@@ -140,7 +146,7 @@ export default function DashboardPage() {
                     <td className="si-td font-medium">{item.name}</td>
                     <td className="si-td text-muted">{item.batch}</td>
                     <td className="si-td">{item.stock}</td>
-                    <td className="si-td text-right" style={{ color: 'var(--color-warning)' }}>{item.expiry}</td>
+                    <td className="si-td text-right" style={{ color: 'var(--color-warning)', fontWeight: 600 }}>{item.expiry}</td>
                   </tr>
                 ))}
                 {data.expiringMedicines.length === 0 && (
@@ -154,9 +160,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Low Stock Table */}
-        <div className="si-card">
-          <div className="dash-card-header">
-            <h3 className="dash-card-title">Low Stock Alert</h3>
+        <div className="si-card si-table-card" style={{ marginBottom: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--color-border)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text)' }}>Low Stock Alert</h3>
             <button className="si-btn si-btn-outline si-btn-sm" onClick={() => navigate('/suppliers')}>
               Contact Suppliers
             </button>
