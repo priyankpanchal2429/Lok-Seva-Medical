@@ -184,7 +184,7 @@ async function login(req, res) {
       return res.status(400).json({ error: 'User ID and password are required.' });
     }
 
-    const sanitizedUserId = sanitizeInput(userId);
+    const sanitizedUserId = sanitizeInput(userId).trim();
     const trimmedPassword = password.trim();
 
     // ============================================================
