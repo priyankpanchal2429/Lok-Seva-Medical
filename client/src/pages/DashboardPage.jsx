@@ -3,13 +3,22 @@
  * Minimal post-login dashboard with store branding and logout.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { performLogout } from '../utils/auth';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function DashboardPage({ user }) {
   const navigate = useNavigate();
+
+  // ----- Financial Year State -----
+  const [financialYear, setFinancialYear] = useState(() => {
+    return localStorage.getItem('lok-seva-fy') || '2026-27';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('lok-seva-fy', financialYear);
+  }, [financialYear]);
 
   /** Handle logout — clear session and redirect to login */
   const handleLogout = useCallback(async () => {
@@ -25,6 +34,21 @@ export default function DashboardPage({ user }) {
       <header style={styles.header}>
         <div style={styles.headerLeft}>
           <h1 style={styles.storeName}>Lok Seva Medical Store</h1>
+          
+          {/* Financial Year Selector */}
+          <div className="fy-selector-container">
+            <span className="fy-label">F.Y.</span>
+            <select 
+              className="fy-select"
+              value={financialYear}
+              onChange={(e) => setFinancialYear(e.target.value)}
+            >
+              <option value="2026-27">2026-2027</option>
+              <option value="2025-26">2025-2026</option>
+              <option value="2024-25">2024-2025</option>
+              <option value="2023-24">2023-2024</option>
+            </select>
+          </div>
         </div>
         <div style={styles.headerRight}>
           <ThemeToggle />
