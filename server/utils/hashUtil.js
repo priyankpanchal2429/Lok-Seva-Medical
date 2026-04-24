@@ -3,7 +3,7 @@
  * Wrappers around bcrypt for password hashing and comparison.
  */
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 /** Number of salt rounds for bcrypt hashing */
 const SALT_ROUNDS = 12;
@@ -24,7 +24,10 @@ async function hashPassword(plainPassword) {
  * @returns {Promise<boolean>}
  */
 async function comparePassword(plainPassword, hashedPassword) {
-  return bcrypt.compare(plainPassword, hashedPassword);
+  console.log('[DEBUG] Comparing passwords...');
+  const match = await bcrypt.compare(plainPassword, hashedPassword);
+  console.log('[DEBUG] Match result:', match);
+  return match;
 }
 
 module.exports = { hashPassword, comparePassword };
