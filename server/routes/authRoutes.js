@@ -6,9 +6,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { login, logout, getMe } = require('../controllers/authController');
+const { register, login, logout, getMe } = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 const { loginLimiter } = require('../middleware/rateLimiter');
+
+// POST /api/auth/register — Create a new account (rate limited)
+router.post('/register', loginLimiter, register);
 
 // POST /api/auth/login — Authenticate user (rate limited)
 router.post('/login', loginLimiter, login);

@@ -20,6 +20,22 @@ const userSchema = new mongoose.Schema({
   passwordHash: {
     type: String,
     required: true
+  },
+  question1: {
+    type: String,
+    default: "What is your birth place?"
+  },
+  answer1Hash: {
+    type: String,
+    required: true
+  },
+  question2: {
+    type: String,
+    default: "What is your 1st vehicle?"
+  },
+  answer2Hash: {
+    type: String,
+    required: true
   }
 }, { timestamps: true });
 

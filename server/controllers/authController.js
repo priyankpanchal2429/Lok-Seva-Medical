@@ -7,7 +7,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config/env');
 const User = require('../models/User');
-const { comparePassword } = require('../utils/hashUtil');
+const { comparePassword, hashPassword } = require('../utils/hashUtil');
 const { logAuthEvent } = require('../utils/logger');
 const { generateCsrfToken } = require('../middleware/csrfMiddleware');
 
@@ -37,6 +37,63 @@ function sanitizeInput(input) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
     .replace(/\//g, '&#x2F;');
+}
+
+/**
+ * Register a new user
+ * Handles password hashing and security question hashing.
+ */
+async function register(req, res) {
+  try {
+    const { name, userId, password, answer1, answer2 } = req.body;
+
+    // 1. Validation
+    if (!name || !userId || !password || !answer1 || !answer2) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    }
+
+    const sanitizedUserId = sanitizeInput(userId).trim();
+    const sanitizedName = sanitizeInput(name).trim();
+
+    // 2. Check if user already exists
+    const existingUser = await User.findOne({ 
+      id: { $regex: new RegExp('^' + sanitizedUserId + '$', 'i') } 
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'User ID already exists.' });
+    }
+
+    // 3. Hash sensitive data
+    const passwordHash = await hashPassword(password.trim());
+    const answer1Hash = await hashPassword(answer1.trim().toLowerCase());
+    const answer2Hash = await hashPassword(answer2.trim().toLowerCase());
+
+    // 4. Save user
+    const newUser = new User({
+      id: sanitizedUserId,
+      name: sanitizedName,
+      passwordHash,
+      answer1Hash,
+      answer2Hash
+    });
+
+    await newUser.save();
+
+    logAuthEvent('USER_REGISTERED', {
+      userId: sanitizedUserId,
+      ip: req.ip
+    });
+
+    return res.status(201).json({ message: 'Account created successfully.' });
+  } catch (error) {
+    console.error('[AUTH] Registration error:', error.message);
+    return res.status(500).json({ error: 'Internal server error during registration.' });
+  }
 }
 
 /**
@@ -269,4 +326,9 @@ function getMe(req, res) {
   });
 }
 
-module.exports = { login, logout, getMe };
+module.exports = {
+  register,
+  login,
+  logout,
+  getMe,
+};
