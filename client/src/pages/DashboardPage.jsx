@@ -3,12 +3,17 @@
  * Post-login dashboard with store branding, financial year selector, and a user profile sidebar.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { performLogout } from '../utils/auth';
 import ThemeToggle from '../components/ThemeToggle';
 
 // --- SVGs ---
+const ChevronDownIcon = () => (
+  <svg className="fy-trigger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>
+);
 const UserAvatarIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -48,13 +53,27 @@ export default function DashboardPage({ user }) {
   const navigate = useNavigate();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFYDropdownOpen, setIsFYDropdownOpen] = useState(false);
+  const fyDropdownRef = useRef(null);
+
   const [financialYear, setFinancialYear] = useState(() => {
-    return localStorage.getItem('lok-seva-fy') || '2026-27';
+    return localStorage.getItem('lok-seva-fy') || '2026-2027';
   });
 
   useEffect(() => {
     localStorage.setItem('lok-seva-fy', financialYear);
   }, [financialYear]);
+
+  // Click outside to close FY dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (fyDropdownRef.current && !fyDropdownRef.current.contains(event.target)) {
+        setIsFYDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Lock body scroll when sidebar is open
   useEffect(() => {
@@ -95,18 +114,31 @@ export default function DashboardPage({ user }) {
           </div>
           <div style={styles.headerRight}>
             {/* Financial Year Selector */}
-            <div className="fy-selector-container">
-              <span className="fy-label">F.Y.</span>
-              <select 
-                className="fy-select"
-                value={financialYear}
-                onChange={(e) => setFinancialYear(e.target.value)}
+            <div className="fy-selector-container" ref={fyDropdownRef}>
+              <button 
+                className={`fy-trigger-btn ${isFYDropdownOpen ? 'open' : ''}`}
+                onClick={() => setIsFYDropdownOpen(!isFYDropdownOpen)}
               >
-                <option value="2026-27">2026-2027</option>
-                <option value="2025-26">2025-2026</option>
-                <option value="2024-25">2024-2025</option>
-                <option value="2023-24">2023-2024</option>
-              </select>
+                <span>F.Y. {financialYear}</span>
+                <ChevronDownIcon />
+              </button>
+
+              {isFYDropdownOpen && (
+                <div className="fy-dropdown-menu">
+                  {['2026-2027', '2025-2026', '2024-2025', '2023-2024', '2022-2023', '2021-2022', '2020-2021', '2019-2020', '2018-2019', '2017-2018'].map((year) => (
+                    <button
+                      key={year}
+                      className={`fy-dropdown-item ${financialYear === year ? 'active' : ''}`}
+                      onClick={() => {
+                        setFinancialYear(year);
+                        setIsFYDropdownOpen(false);
+                      }}
+                    >
+                      F.Y. {year}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <ThemeToggle />
