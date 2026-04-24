@@ -6,7 +6,7 @@
 const bcrypt = require('bcryptjs');
 
 /** Number of salt rounds for bcrypt hashing */
-const SALT_ROUNDS = 12;
+const SALT_ROUNDS = 10;
 
 /**
  * Hash a plaintext password.
