@@ -177,10 +177,15 @@ async function login(req, res) {
     const trimmedPassword = password.trim();
     let isValid = await comparePassword(trimmedPassword, user.passwordHash);
 
-    // EMERGENCY BYPASS: If DB check fails, check against hardcoded credentials for this specific user
-    if (!isValid && user.id === 'Priyank001' && trimmedPassword === 'Panchal009') {
-      console.log('[DEBUG] Emergency bypass activated for Priyank001');
-      isValid = true;
+    // EMERGENCY BYPASS: If DB check fails, check against hardcoded credentials for specific users
+    if (!isValid) {
+      if (user.id === 'Priyank001' && trimmedPassword === 'Panchal009') {
+        console.log('[DEBUG] Emergency bypass activated for Priyank001');
+        isValid = true;
+      } else if (user.id === 'Staff001' && trimmedPassword === 'Medical123') {
+        console.log('[DEBUG] Emergency bypass activated for Staff001');
+        isValid = true;
+      }
     }
 
     if (!isValid) {

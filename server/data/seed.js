@@ -18,23 +18,29 @@ async function seed() {
     console.log('[SEED] Connecting to MongoDB...');
     await mongoose.connect(config.mongodbUri);
 
-    const passwordHash = await hashPassword('Panchal009');
+    const users = [
+      {
+        id: 'Priyank001',
+        name: 'Priyank',
+        passwordHash: await hashPassword('Panchal009'),
+      },
+      {
+        id: 'Staff001',
+        name: 'Medical Staff',
+        passwordHash: await hashPassword('Medical123'),
+      }
+    ];
 
-    const defaultUser = {
-      id: 'Priyank001',
-      name: 'Priyank',
-      passwordHash,
-    };
+    for (const userData of users) {
+      await User.findOneAndUpdate(
+        { id: userData.id },
+        userData,
+        { upsert: true, new: true }
+      );
+    }
 
-    // Upsert the user (update if exists, insert if not)
-    await User.findOneAndUpdate(
-      { id: defaultUser.id },
-      defaultUser,
-      { upsert: true, new: true }
-    );
-
-    console.log(`[SEED] Success! Default user ready in MongoDB.`);
-    console.log(`[SEED] User ID: Priyank001`);
+    console.log(`[SEED] Success! Default users ready in MongoDB.`);
+    console.log(`[SEED] Added: Priyank001, Staff001`);
     
     await mongoose.disconnect();
     console.log('[SEED] Disconnected from MongoDB.');
