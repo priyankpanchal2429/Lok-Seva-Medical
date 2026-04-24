@@ -517,3 +517,559 @@ body {
   font-size: 12px;
   color: var(--color-text-muted);
 }
+
+/* ============================================================
+   MainLayout — Root Grid Structure
+   ============================================================ */
+
+.layout-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+}
+
+.layout-header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  z-index: 30;
+  position: sticky;
+  top: 0;
+}
+
+.layout-header-inner {
+  width: 100%;
+  max-width: 1770px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+}
+
+.layout-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.layout-store-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: -0.3px;
+}
+
+.layout-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.layout-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== Left Navigation ===== */
+
+.layout-left-nav {
+  width: 220px;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.left-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  margin: 2px 8px;
+  border-radius: 6px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: calc(100% - 16px);
+}
+
+.left-nav-item:hover {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.left-nav-item.active {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.left-nav-label {
+  white-space: nowrap;
+}
+
+/* ===== Main Content Area ===== */
+
+.layout-main {
+  flex: 1;
+  overflow-y: auto;
+  height: calc(100vh - 53px); /* viewport minus header */
+  background-color: var(--color-bg);
+}
+
+/* ===== User Header Button ===== */
+
+.user-header-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: 4px 12px 4px 4px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-header-btn:hover {
+  border-color: var(--color-primary);
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-header-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Sales Invoice Page Styles
+   ============================================================ */
+
+.si-page {
+  padding: 24px;
+  max-width: 1770px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* --- Page Header --- */
+
+.si-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.si-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.si-page-subtitle {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.si-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --- Buttons --- */
+
+.si-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.si-btn-primary {
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+}
+
+.si-btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.si-btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.si-btn-secondary:hover {
+  background-color: var(--color-bg);
+  border-color: var(--color-primary);
+}
+
+.si-btn-outline {
+  background: none;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.si-btn-outline:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+/* --- Cards --- */
+
+.si-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.si-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+/* --- Meta Row (Invoice + Patient side by side) --- */
+
+.si-meta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.si-field-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.si-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.si-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.si-input {
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.si-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.si-input[readonly] {
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+/* --- Search Section --- */
+
+.si-search-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.si-search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  transition: border-color 0.2s ease;
+  color: var(--color-text-secondary);
+}
+
+.si-search-bar:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.si-search-input {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  font-family: 'Inter', sans-serif;
+}
+
+.si-search-input:focus {
+  outline: none;
+}
+
+.si-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.si-add-btn {
+  flex-shrink: 0;
+  height: 44px;
+}
+
+/* --- Invoice Table --- */
+
+.si-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.si-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.si-th {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  text-align: left;
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.si-td {
+  padding: 10px 16px;
+  font-size: 14px;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.si-td-center {
+  text-align: center;
+}
+
+.si-td-total {
+  font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.si-table-row:hover {
+  background-color: var(--color-bg);
+}
+
+.si-table-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: var(--color-text);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s ease;
+}
+
+.si-table-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
+}
+
+.si-table-input:hover {
+  border-color: var(--color-border);
+}
+
+.si-table-input-num {
+  text-align: right;
+  width: 90px;
+}
+
+.si-empty-row {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.si-empty-hint {
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--color-text-muted);
+}
+
+.si-delete-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  transition: all 0.15s ease;
+}
+
+.si-delete-btn:hover {
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
+}
+
+/* --- Summary / Totals --- */
+
+.si-summary-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.si-summary-spacer {
+  flex: 1;
+}
+
+.si-summary-card {
+  width: 380px;
+  padding: 20px 24px;
+}
+
+.si-summary-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.si-summary-discount {
+  gap: 12px;
+}
+
+.si-discount-input-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.si-discount-input {
+  width: 50px;
+  padding: 4px 6px;
+  font-size: 13px;
+  text-align: right;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', sans-serif;
+}
+
+.si-discount-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.si-discount-symbol {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.si-discount-amount {
+  font-size: 14px;
+  color: var(--color-error);
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.si-summary-divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 8px 0;
+}
+
+.si-summary-grand {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  padding: 12px 0 4px;
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 900px) {
+  .si-meta-row {
+    grid-template-columns: 1fr;
+  }
+  .si-field-row {
+    grid-template-columns: 1fr;
+  }
+  .layout-left-nav {
+    width: 56px;
+    padding: 12px 0;
+  }
+  .left-nav-label {
+    display: none;
+  }
+  .left-nav-item {
+    justify-content: center;
+    padding: 12px;
+    margin: 2px 4px;
+  }
+}

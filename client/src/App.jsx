@@ -1,12 +1,15 @@
 /**
  * App Component
  * Root component with React Router and inactivity-based auto-logout.
+ * Uses MainLayout for nested page routing.
  */
 
 import { useEffect, useCallback, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import SalesInvoicePage from './pages/SalesInvoicePage';
+import MainLayout from './components/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { performLogout } from './utils/auth';
 
@@ -70,15 +73,17 @@ export default function App() {
         {/* Login route */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Protected dashboard route */}
+        {/* Protected routes with shared MainLayout */}
         <Route
-          path="/dashboard"
           element={
             <ProtectedRoute onAuthResolved={handleAuthResolved}>
-              {(user) => <DashboardPage user={user} />}
+              {(user) => <MainLayout user={user} />}
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/sales-invoice" element={<SalesInvoicePage />} />
+        </Route>
 
         {/* Catch-all: redirect to login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
