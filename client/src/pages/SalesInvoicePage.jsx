@@ -4,7 +4,7 @@
  * Allows adding medicines, calculating taxes, discounts, and printing invoices.
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 
 // ============================================================
@@ -80,9 +80,71 @@ export default function SalesInvoicePage() {
 
   // Patient info
   const [patientName, setPatientName] = useState('');
+  const [patientAge, setPatientAge] = useState('');
   const [patientPhone, setPatientPhone] = useState('');
+  const [patientAddress, setPatientAddress] = useState('');
   const [phoneWarning, setPhoneWarning] = useState('');
   const [doctorName, setDoctorName] = useState('');
+
+  // Patient Search State
+  const [allPatients, setAllPatients] = useState([]);
+  const [filteredPatients, setFilteredPatients] = useState([]);
+  const [showPatientResults, setShowPatientResults] = useState(false);
+  const patientSearchRef = useRef(null);
+
+  // Load patients for search
+  useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        const res = await fetch('/api/patients', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setAllPatients(data);
+        }
+      } catch (err) {
+        console.error('Error fetching patients for search:', err);
+      }
+    };
+    loadPatients();
+  }, []);
+
+  // Handle click outside patient search
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (patientSearchRef.current && !patientSearchRef.current.contains(event.target)) {
+        setShowPatientResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  /** Handle Patient Search as user types */
+  const handlePatientSearch = (value) => {
+    setPatientName(value);
+    if (value.trim().length > 0) {
+      const filtered = allPatients.filter(p => 
+        p.fullName.toLowerCase().includes(value.toLowerCase()) || 
+        p.phoneNumber.includes(value)
+      );
+      setFilteredPatients(filtered);
+      setShowPatientResults(true);
+    } else {
+      setShowPatientResults(false);
+    }
+  };
+
+  /** Select patient from search results */
+  const selectPatient = (patient) => {
+    setPatientName(patient.fullName);
+    setPatientAge(patient.age || '');
+    setPatientPhone(patient.phoneNumber || '');
+    setPatientAddress(patient.fullAddress || '');
+    setPhoneWarning('');
+    setShowPatientResults(false);
+  };
 
   /** Only allow digits in phone field, show warning otherwise */
   const handlePhoneChange = useCallback((e) => {
@@ -137,7 +199,9 @@ export default function SalesInvoicePage() {
   const handleClearInvoice = useCallback(() => {
     setItems([]);
     setPatientName('');
+    setPatientAge('');
     setPatientPhone('');
+    setPatientAddress('');
     setDoctorName('');
     setDiscountPercent(0);
     setSearchQuery('');
@@ -199,16 +263,41 @@ export default function SalesInvoicePage() {
         {/* Patient Info Card */}
         <div className="si-card si-patient-info">
           <h3 className="si-card-title">Patient Details</h3>
-          <div className="si-field-row">
-            <div className="si-field">
+          <div className="si-field-grid">
+            <div className="si-field si-pos-relative" ref={patientSearchRef}>
               <label className="si-label">Patient Name</label>
               <input
                 id="patient-name"
                 className="si-input"
                 type="text"
-                placeholder="Enter patient name"
+                placeholder="Search or enter name"
                 value={patientName}
-                onChange={(e) => setPatientName(e.target.value)}
+                onChange={(e) => handlePatientSearch(e.target.value)}
+                autoComplete="off"
+              />
+              {showPatientResults && filteredPatients.length > 0 && (
+                <div className="si-search-results">
+                  {filteredPatients.map(p => (
+                    <div 
+                      key={p._id} 
+                      className="si-search-item"
+                      onClick={() => selectPatient(p)}
+                    >
+                      <div className="si-search-item-name">{p.fullName}</div>
+                      <div className="si-search-item-meta">{p.phoneNumber} • {p.age} Yrs</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="si-field">
+              <label className="si-label">Age</label>
+              <input
+                className="si-input"
+                type="number"
+                placeholder="Yrs"
+                value={patientAge}
+                onChange={(e) => setPatientAge(e.target.value)}
               />
             </div>
             <div className="si-field">
@@ -217,7 +306,7 @@ export default function SalesInvoicePage() {
                 id="patient-phone"
                 className={`si-input ${phoneWarning ? 'si-input-warn' : ''}`}
                 type="tel"
-                placeholder="Enter phone number"
+                placeholder="Phone"
                 value={patientPhone}
                 onChange={handlePhoneChange}
                 maxLength={10}
@@ -235,6 +324,16 @@ export default function SalesInvoicePage() {
                 onChange={(e) => setDoctorName(e.target.value)}
               />
             </div>
+          </div>
+          <div className="si-field mt-12">
+            <label className="si-label">Full Address</label>
+            <input
+              className="si-input"
+              type="text"
+              placeholder="Enter full address"
+              value={patientAddress}
+              onChange={(e) => setPatientAddress(e.target.value)}
+            />
           </div>
         </div>
       </div>

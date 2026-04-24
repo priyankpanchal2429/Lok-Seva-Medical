@@ -778,6 +778,62 @@ body {
   gap: 6px;
 }
 
+.si-field-grid {
+  display: grid;
+  grid-template-columns: 2fr 0.8fr 1.2fr 1.5fr;
+  gap: 16px;
+}
+
+.si-pos-relative {
+  position: relative;
+}
+
+.si-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.si-search-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.15s ease;
+}
+
+.si-search-item:last-child {
+  border-bottom: none;
+}
+
+.si-search-item:hover {
+  background-color: var(--color-bg);
+}
+
+.si-search-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.si-search-item-meta {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.mt-12 {
+  margin-top: 12px;
+}
+
 .si-label {
   font-size: 12px;
   font-weight: 600;
@@ -1072,4 +1128,116 @@ body {
   .layout-header-left {
     gap: 12px;
   }
+}
+
+/* ============================================================
+   Patient Page Specific Styles
+   ============================================================ */
+
+.pt-badge {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.pt-icon-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  transition: all 0.15s ease;
+  color: var(--color-text-secondary);
+}
+
+.pt-icon-btn:hover {
+  background-color: var(--color-bg);
+}
+
+.pt-edit:hover {
+  color: var(--color-primary);
+}
+
+.pt-delete:hover {
+  color: var(--color-error);
+}
+
+/* --- Modal Styles --- */
+
+.pt-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.pt-modal {
+  background-color: var(--color-surface);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 650px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: modalEnter 0.3s ease-out;
+}
+
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.pt-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pt-modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.pt-modal-close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.pt-modal-close:hover {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.pt-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pt-modal-footer {
+  padding: 20px 24px;
+  background-color: var(--color-bg);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--color-border);
 }

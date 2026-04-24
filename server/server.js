@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 
 const config = require('./config/env');
 const authRoutes = require('./routes/authRoutes');
+const patientRoutes = require('./routes/patientRoutes');
 const { globalLimiter } = require('./middleware/rateLimiter');
 
 
@@ -71,6 +72,7 @@ if (config.nodeEnv !== 'test') {
 // ============================================================
 
 app.use('/api/auth', authRoutes);
+app.use('/api/patients', patientRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
