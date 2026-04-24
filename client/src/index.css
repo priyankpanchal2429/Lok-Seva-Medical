@@ -810,6 +810,21 @@ body {
   cursor: default;
 }
 
+.si-input-warn {
+  border-color: var(--color-error);
+}
+
+.si-input-warn:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.si-field-warning {
+  font-size: 11px;
+  color: var(--color-error);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
 /* --- Search Section --- */
 
 .si-search-section {

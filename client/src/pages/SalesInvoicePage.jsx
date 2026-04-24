@@ -81,7 +81,20 @@ export default function SalesInvoicePage() {
   // Patient info
   const [patientName, setPatientName] = useState('');
   const [patientPhone, setPatientPhone] = useState('');
+  const [phoneWarning, setPhoneWarning] = useState('');
   const [doctorName, setDoctorName] = useState('');
+
+  /** Only allow digits in phone field, show warning otherwise */
+  const handlePhoneChange = useCallback((e) => {
+    const raw = e.target.value;
+    const digitsOnly = raw.replace(/\D/g, '');
+    if (raw !== digitsOnly) {
+      setPhoneWarning('Only numbers are allowed');
+    } else {
+      setPhoneWarning('');
+    }
+    setPatientPhone(digitsOnly);
+  }, []);
 
   // Medicine search
   const [searchQuery, setSearchQuery] = useState('');
@@ -202,12 +215,14 @@ export default function SalesInvoicePage() {
               <label className="si-label">Phone Number</label>
               <input
                 id="patient-phone"
-                className="si-input"
+                className={`si-input ${phoneWarning ? 'si-input-warn' : ''}`}
                 type="tel"
                 placeholder="Enter phone number"
                 value={patientPhone}
-                onChange={(e) => setPatientPhone(e.target.value)}
+                onChange={handlePhoneChange}
+                maxLength={10}
               />
+              {phoneWarning && <span className="si-field-warning">{phoneWarning}</span>}
             </div>
             <div className="si-field">
               <label className="si-label">Prescribing Doctor</label>
