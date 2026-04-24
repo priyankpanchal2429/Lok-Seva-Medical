@@ -152,11 +152,16 @@ async function login(req, res) {
       throw new Error('Database not connected. Please try again in a moment.');
     }
 
-    const user = await User.findOne({ id: sanitizedUserId });
+    // Use case-insensitive search for ID and trim again just in case
+    const user = await User.findOne({ 
+      id: { $regex: new RegExp('^' + sanitizedUserId + '$', 'i') } 
+    });
 
     if (!user) {
       recordFailedAttempt(sanitizedUserId);
 
+      console.log(`[AUTH] Login failed: User "${sanitizedUserId}" not found in database.`);
+      
       logAuthEvent('LOGIN_FAILED', {
         userId: sanitizedUserId,
         ip: req.ip,
@@ -165,6 +170,8 @@ async function login(req, res) {
 
       return res.status(401).json({ error: 'Invalid User ID or password.' });
     }
+
+    console.log(`[AUTH] User "${user.id}" found. Verifying password...`);
 
     // --- Verify password ---
     const isValid = await comparePassword(password, user.passwordHash);
