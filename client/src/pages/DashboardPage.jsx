@@ -34,7 +34,8 @@ export default function DashboardPage({ user }) {
       <header style={styles.header}>
         <div style={styles.headerLeft}>
           <h1 style={styles.storeName}>Lok Seva Medical Store</h1>
-          
+        </div>
+        <div style={styles.headerRight}>
           {/* Financial Year Selector */}
           <div className="fy-selector-container">
             <span className="fy-label">F.Y.</span>
@@ -49,8 +50,7 @@ export default function DashboardPage({ user }) {
               <option value="2023-24">2023-2024</option>
             </select>
           </div>
-        </div>
-        <div style={styles.headerRight}>
+
           <ThemeToggle />
           <button
             id="logout-button"

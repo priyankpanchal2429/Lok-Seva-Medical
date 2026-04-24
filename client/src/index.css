@@ -226,9 +226,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 16px;
-  padding-left: 16px;
-  border-left: 1px solid var(--color-border);
+  margin-right: 8px;
 }
 
 .fy-label {
