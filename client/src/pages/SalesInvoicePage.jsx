@@ -94,9 +94,10 @@ export default function SalesInvoicePage() {
 
   // Invoice metadata
   const [invoiceNumber, setInvoiceNumber] = useState(generateInvoiceNumber());
-  const [invoiceDate, setInvoiceDate] = useState(() => new Date().toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
-  }));
+  const [invoiceDate, setInvoiceDate] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
 
   // Patient info
   const [patientName, setPatientName] = useState('');
@@ -240,9 +241,8 @@ export default function SalesInvoicePage() {
     setSearchQuery('');
     setEditingInvoiceId(null);
     setInvoiceNumber(generateInvoiceNumber());
-    setInvoiceDate(new Date().toLocaleDateString('en-IN', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    }));
+    const today = new Date();
+    setInvoiceDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
   }, []);
 
   const handleEditInvoice = useCallback((invoice) => {

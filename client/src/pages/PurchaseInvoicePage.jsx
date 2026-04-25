@@ -117,7 +117,7 @@ export default function PurchaseInvoicePage() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(() => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   });
 
   // Items State
@@ -168,7 +168,8 @@ export default function PurchaseInvoicePage() {
     setSupplierGst('');
     setInvoiceNumber('');
     setAmountPaid(0);
-    setInvoiceDate(new Date().toISOString().split('T')[0]);
+    const today = new Date();
+    setInvoiceDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
     setEditingInvoiceId(null);
   }, []);
 
@@ -176,7 +177,8 @@ export default function PurchaseInvoicePage() {
     setEditingInvoiceId(invoice._id);
     setInvoiceNumber(invoice.invoiceNumber || '');
     // Convert date if needed or use as is
-    setInvoiceDate(invoice.invoiceDate || new Date().toISOString().split('T')[0]);
+    const today = new Date();
+    setInvoiceDate(invoice.invoiceDate || `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
     setSupplierName(invoice.supplierName || '');
     setSupplierPhone(invoice.supplierPhone || '');
     setSupplierGst(invoice.supplierGst || '');
@@ -322,7 +324,8 @@ export default function PurchaseInvoicePage() {
       setSupplierGst('');
       setInvoiceNumber('');
       setAmountPaid(0);
-      setInvoiceDate(new Date().toISOString().split('T')[0]);
+      const today = new Date();
+      setInvoiceDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
       setEditingInvoiceId(null);
       setActiveTab('history');
     } catch (err) {
