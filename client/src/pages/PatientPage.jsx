@@ -226,7 +226,8 @@ export default function PatientPage() {
               <th className="si-th">Age</th>
               <th className="si-th">Phone</th>
               <th className="si-th">Address</th>
-              <th className="si-th">Gender / Blood</th>
+              <th className="si-th">Gender</th>
+              <th className="si-th">Blood</th>
               <th className="si-th">Disease</th>
               <th className="si-th" style={{ width: '180px', textAlign: 'center' }}>Actions</th>
             </tr>
@@ -234,11 +235,11 @@ export default function PatientPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="7" className="si-empty-row">Loading patients...</td>
+                <td colSpan="8" className="si-empty-row">Loading patients...</td>
               </tr>
             ) : filteredPatients.length === 0 ? (
               <tr>
-                <td colSpan="7" className="si-empty-row">No patients found.</td>
+                <td colSpan="8" className="si-empty-row">No patients found.</td>
               </tr>
             ) : (
               filteredPatients.map((patient) => (
@@ -249,9 +250,9 @@ export default function PatientPage() {
                   <td className="si-td text-muted" title={patient.fullAddress}>
                     {patient.fullAddress ? (patient.fullAddress.length > 30 ? patient.fullAddress.substring(0, 30) + '...' : patient.fullAddress) : '-'}
                   </td>
+                  <td className="si-td">{patient.gender || '-'}</td>
                   <td className="si-td">
-                    {patient.gender && <span>{patient.gender} </span>}
-                    {patient.bloodGroup && <span className="pt-badge">{patient.bloodGroup}</span>}
+                    {patient.bloodGroup ? <span className="pt-badge">{patient.bloodGroup}</span> : '-'}
                   </td>
                   <td className="si-td text-muted">{patient.patientDisease || '-'}</td>
                   <td className="si-td">
