@@ -102,7 +102,7 @@ export default function PurchaseInvoicePage() {
     setSupplierName(value);
     const filtered = allSuppliers.filter(s => 
       (s.name || '').toLowerCase().includes(value.toLowerCase()) || 
-      (s.contactNumber || '').includes(value)
+      (s.phoneNumber || '').includes(value)
     );
     setFilteredSuppliers(filtered);
     setShowSupplierResults(true);
@@ -110,7 +110,7 @@ export default function PurchaseInvoicePage() {
 
   const selectSupplier = (supplier) => {
     setSupplierName(supplier.name || '');
-    setSupplierPhone(supplier.contactNumber || '');
+    setSupplierPhone(supplier.phoneNumber || '');
     setSupplierGst(supplier.gstin || '');
     setShowSupplierResults(false);
   };
@@ -441,7 +441,7 @@ export default function PurchaseInvoicePage() {
                       onClick={() => selectSupplier(s)}
                     >
                       <div className="si-search-item-name">{s.name}</div>
-                      <div className="si-search-item-meta">{s.contactNumber} • {s.gstin ? `GST: ${s.gstin}` : 'No GST'}</div>
+                      <div className="si-search-item-meta">{s.phoneNumber} • {s.gstin ? `GST: ${s.gstin}` : 'No GST'}</div>
                     </div>
                   ))}
                 </div>
