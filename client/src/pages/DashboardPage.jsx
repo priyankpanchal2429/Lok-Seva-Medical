@@ -149,15 +149,23 @@ export default function DashboardPage() {
   // Medicine alerts
   const [expiringMedicines, setExpiringMedicines] = useState([]);
   const [lowStockMedicines, setLowStockMedicines] = useState([]);
+  const [fetchError, setFetchError] = useState('');
 
   /** Fetch all dashboard data */
   const fetchDashboard = useCallback(async () => {
+    setFetchError('');
+
+    // Fetch outstanding data
     try {
-      // Fetch outstanding data
       const { data: outstanding } = await api.get('/dashboard/outstanding');
       setOutstandingData(outstanding);
+    } catch (err) {
+      console.error('Outstanding fetch error:', err);
+      setFetchError('Could not load outstanding data. Server may need restart.');
+    }
 
-      // Fetch medicines for alerts
+    // Fetch medicines for alerts (independent of outstanding)
+    try {
       const { data: medicines } = await api.get('/medicines');
 
       // Expiring in 30 days
@@ -173,14 +181,13 @@ export default function DashboardPage() {
       // Low stock (qty <= 5)
       const lowStock = medicines.filter(m => (m.stockQty || 0) <= 5);
       setLowStockMedicines(lowStock.slice(0, 10));
-
-      setLastUpdated(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }));
     } catch (err) {
-      console.error('Dashboard fetch error:', err);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+      console.error('Medicines fetch error:', err);
     }
+
+    setLastUpdated(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }));
+    setIsLoading(false);
+    setIsRefreshing(false);
   }, []);
 
   useEffect(() => {
@@ -225,6 +232,12 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
+      {/* Error banner */}
+      {fetchError && (
+        <div style={{ marginTop: '16px', padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '13px', fontWeight: 500 }}>
+          ⚠️ {fetchError}
+        </div>
+      )}
 
       {/* ===== Outstanding Cards ===== */}
       <div className="db-outstanding-grid">
