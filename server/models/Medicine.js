@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 const medicineSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true, trim: true },
+  category: { type: String, default: '', trim: true },
   stockQty: { type: Number, default: 0, min: 0 },
   mrp: { type: Number, default: 0, min: 0 },
   purchasePrice: { type: Number, default: 0, min: 0 },
