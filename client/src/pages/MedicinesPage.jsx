@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import DatePicker from '../components/DatePicker';
+import api from '../utils/api';
 
 // ============================================================
 // SVG Icons
@@ -34,7 +34,7 @@ const EditIcon = () => (
 const TrashIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="3 6 5 6 21 6"></polyline>
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path>
   </svg>
 );
 
@@ -46,15 +46,27 @@ const CloseIcon = () => (
 );
 
 // ============================================================
-// Mock Data
+// API Calls
 // ============================================================
-const MOCK_MEDICINES = [
-  { _id: '1', name: 'Amoxicillin 500mg', batch: 'AMX-2023', expiryDate: '2026-04-28', stock: 45, price: 120.00, category: 'Antibiotic' },
-  { _id: '2', name: 'Paracetamol 650mg', batch: 'PCM-109', expiryDate: '2026-04-30', stock: 120, price: 35.00, category: 'Analgesic' },
-  { _id: '3', name: 'Cetirizine 10mg', batch: 'CET-88', expiryDate: '2026-05-01', stock: 30, price: 45.50, category: 'Antihistamine' },
-  { _id: '4', name: 'Azithromycin 250mg', batch: 'AZ-44', expiryDate: '2025-11-15', stock: 1, price: 210.00, category: 'Antibiotic' },
-  { _id: '5', name: 'Ibuprofen 400mg', batch: 'IBU-99', expiryDate: '2027-02-10', stock: 0, price: 60.00, category: 'NSAID' },
-];
+const fetchMedicines = async () => {
+  const { data } = await api.get('/medicines');
+  return data;
+};
+
+const createMedicine = async (payload) => {
+  const { data } = await api.post('/medicines', payload);
+  return data;
+};
+
+const updateMedicine = async (id, payload) => {
+  const { data } = await api.put(`/medicines/${id}`, payload);
+  return data;
+};
+
+const deleteMedicine = async (id) => {
+  const { data } = await api.delete(`/medicines/${id}`);
+  return data;
+};
 
 // ============================================================
 // Component
@@ -72,31 +84,42 @@ export default function MedicinesPage() {
   // Form state
   const [formData, setFormData] = useState({
     name: '',
-    batch: '',
-    expiryDate: '',
-    stock: '',
-    price: '',
-    category: ''
+    stockQty: '',
+    mrp: '',
+    purchasePrice: '',
+    batchNo: '',
+    expiry: ''
   });
 
-  // Load medicines (Mock)
-  const loadMedicines = useCallback(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setMedicines([...MOCK_MEDICINES]);
+  // Load medicines
+  const loadMedicines = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await fetchMedicines();
+      setMedicines(data);
+    } catch (err) {
+      console.error(err);
+      setMedicines([]);
+    } finally {
       setLoading(false);
-    }, 400); // Simulate network delay
+    }
   }, []);
 
   useEffect(() => {
     loadMedicines();
   }, [loadMedicines]);
 
+  // Handle form change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   // Open modal for add
   const handleAddClick = () => {
     setEditingId(null);
     setFormData({
-      name: '', batch: '', expiryDate: '', stock: '', price: '', category: ''
+      name: '', stockQty: '', mrp: '', purchasePrice: '', batchNo: '', expiry: ''
     });
     setIsModalOpen(true);
   };
@@ -106,38 +129,50 @@ export default function MedicinesPage() {
     setEditingId(medicine._id);
     setFormData({
       name: medicine.name,
-      batch: medicine.batch,
-      expiryDate: medicine.expiryDate,
-      stock: medicine.stock,
-      price: medicine.price,
-      category: medicine.category
+      stockQty: medicine.stockQty || 0,
+      mrp: medicine.mrp || 0,
+      purchasePrice: medicine.purchasePrice || 0,
+      batchNo: medicine.batchNo || '',
+      expiry: medicine.expiry || ''
     });
     setIsModalOpen(true);
   };
 
   // Submit form
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      setMedicines(prev => prev.map(m => m._id === editingId ? { ...formData, _id: editingId, stock: Number(formData.stock), price: Number(formData.price) } : m));
-    } else {
-      setMedicines(prev => [{ ...formData, _id: Date.now().toString(), stock: Number(formData.stock), price: Number(formData.price) }, ...prev]);
+    try {
+      const payload = { ...formData };
+      if (editingId) {
+        await updateMedicine(editingId, payload);
+      } else {
+        await createMedicine(payload);
+      }
+      setIsModalOpen(false);
+      loadMedicines();
+    } catch (err) {
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message;
+      alert(msg);
     }
-    setIsModalOpen(false);
   };
 
   // Delete medicine
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this medicine?')) {
-      setMedicines(prev => prev.filter(m => m._id !== id));
+      try {
+        await deleteMedicine(id);
+        loadMedicines();
+      } catch (err) {
+        const msg = err.response?.data?.error || err.response?.data?.message || err.message;
+        alert(msg);
+      }
     }
   };
 
   // Filter medicines
   const filteredMedicines = medicines.filter(m => 
-    m.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    m.batch.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    m.category.toLowerCase().includes(searchQuery.toLowerCase())
+    m.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    m.batchNo?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -145,8 +180,8 @@ export default function MedicinesPage() {
       {/* Header */}
       <div className="si-page-header">
         <div>
-          <h2 className="si-page-title">Medicines Master</h2>
-          <p className="si-page-subtitle">Manage your medicine inventory, pricing, and stock</p>
+          <h2 className="si-page-title">Medicine Master</h2>
+          <p className="si-page-subtitle">View and manage global medicine inventory</p>
         </div>
         <div className="si-header-actions">
           <button className="si-btn si-btn-primary" onClick={handleAddClick}>
@@ -163,7 +198,7 @@ export default function MedicinesPage() {
           <input
             className="si-search-input"
             type="text"
-            placeholder="Search medicines by name, batch, or category..."
+            placeholder="Search medicines by name or batch no..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -172,142 +207,141 @@ export default function MedicinesPage() {
 
       {/* Table */}
       <div className="si-card si-table-card">
-        <div style={{ overflowX: 'auto' }}>
-          <table className="si-table">
-            <thead>
+        <table className="si-table">
+          <thead>
+            <tr>
+              <th className="si-th">Medicine Name</th>
+              <th className="si-th">Stock Qty</th>
+              <th className="si-th">MRP (₹)</th>
+              <th className="si-th">Purchase Price (₹)</th>
+              <th className="si-th">Batch No</th>
+              <th className="si-th">Expiry</th>
+              <th className="si-th" style={{ width: '180px', textAlign: 'center' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
               <tr>
-                <th className="si-th">Medicine Name</th>
-                <th className="si-th" style={{ textAlign: 'center' }}>Category</th>
-                <th className="si-th" style={{ textAlign: 'center' }}>Batch No.</th>
-                <th className="si-th" style={{ textAlign: 'center' }}>Expiry Date</th>
-                <th className="si-th" style={{ textAlign: 'center' }}>Price (₹)</th>
-                <th className="si-th" style={{ textAlign: 'center' }}>Stock</th>
-                <th className="si-th" style={{ width: '180px', textAlign: 'center' }}>Actions</th>
+                <td colSpan="7" className="si-empty-row">Loading medicines...</td>
               </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="7" className="si-empty-row">Loading medicines...</td>
+            ) : filteredMedicines.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="si-empty-row">No medicines found.</td>
+              </tr>
+            ) : (
+              filteredMedicines.map((medicine) => (
+                <tr key={medicine._id} className="si-table-row">
+                  <td className="si-td font-medium">{medicine.name}</td>
+                  <td className="si-td">
+                    <span className={`pt-badge ${medicine.stockQty <= 5 ? 'pt-badge-inactive' : ''}`} style={medicine.stockQty <= 5 ? { backgroundColor: 'var(--color-danger)', color: '#fff' } : {}}>
+                      {medicine.stockQty}
+                    </span>
+                  </td>
+                  <td className="si-td">₹{medicine.mrp}</td>
+                  <td className="si-td">₹{medicine.purchasePrice}</td>
+                  <td className="si-td">{medicine.batchNo || '-'}</td>
+                  <td className="si-td">{medicine.expiry || '-'}</td>
+                  <td className="si-td">
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button className="si-btn si-btn-outline si-btn-sm" onClick={() => handleEditClick(medicine)}>
+                        <EditIcon />
+                        <span>Edit</span>
+                      </button>
+                      <button className="si-btn si-btn-danger-outline si-btn-sm" onClick={() => handleDelete(medicine._id)}>
+                        <TrashIcon />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              ) : filteredMedicines.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="si-empty-row">No medicines found.</td>
-                </tr>
-              ) : (
-                filteredMedicines.map((medicine) => (
-                  <tr key={medicine._id} className="si-table-row">
-                    <td className="si-td font-medium">{medicine.name}</td>
-                    <td className="si-td text-muted" style={{ textAlign: 'center' }}>{medicine.category}</td>
-                    <td className="si-td" style={{ textAlign: 'center' }}>{medicine.batch}</td>
-                    <td className="si-td" style={{ textAlign: 'center', color: new Date(medicine.expiryDate) < new Date() ? 'var(--color-danger)' : 'var(--color-text)' }}>
-                      {medicine.expiryDate}
-                    </td>
-                    <td className="si-td font-medium" style={{ textAlign: 'center' }}>₹{Number(medicine.price).toFixed(2)}</td>
-                    <td className="si-td" style={{ textAlign: 'center' }}>
-                      <span className={`pt-badge ${medicine.stock <= 5 ? 'pt-badge-inactive' : ''}`} style={medicine.stock <= 5 ? { backgroundColor: 'var(--color-danger)', color: '#fff' } : {}}>
-                        {medicine.stock}
-                      </span>
-                    </td>
-                    <td className="si-td">
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                        <button className="si-btn si-btn-outline si-btn-sm" onClick={() => handleEditClick(medicine)}>
-                          <EditIcon />
-                          <span>Edit</span>
-                        </button>
-                        <button className="si-btn si-btn-danger-outline si-btn-sm" onClick={() => handleDelete(medicine._id)}>
-                          <TrashIcon />
-                          <span>Delete</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Modal */}
       {isModalOpen && (
         <div className="pt-modal-overlay">
-          <div className="pt-modal" style={{ maxWidth: '500px' }}>
+          <div className="pt-modal" style={{ maxWidth: '600px' }}>
             <div className="pt-modal-header">
-              <h3>{editingId ? 'Edit Medicine' : 'Add New Medicine'}</h3>
+              <h3 className="pt-modal-title">{editingId ? 'Edit Medicine' : 'Add New Medicine'}</h3>
               <button className="pt-modal-close" onClick={() => setIsModalOpen(false)}>
                 <CloseIcon />
               </button>
             </div>
             
             <form onSubmit={handleSubmit} className="pt-modal-body">
-              <div className="si-field-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <div className="si-field">
-                  <label className="si-label">Medicine Name *</label>
-                  <input
-                    required
-                    className="si-input"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  />
-                </div>
-                <div className="si-field">
-                  <label className="si-label">Category</label>
-                  <input
-                    className="si-input"
-                    placeholder="e.g. Antibiotic"
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  />
-                </div>
+              <div className="si-field">
+                <label className="si-label">Medicine Name *</label>
+                <input
+                  className="si-input"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
               </div>
 
-              <div className="si-field-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="si-field">
-                  <label className="si-label">Batch No. *</label>
+                  <label className="si-label">Stock Qty</label>
                   <input
-                    required
                     className="si-input"
-                    value={formData.batch}
-                    onChange={(e) => setFormData({...formData, batch: e.target.value})}
-                  />
-                </div>
-                <div className="si-field">
-                  <label className="si-label">Expiry Date *</label>
-                  <DatePicker
-                    mode="date"
-                    className="si-input"
-                    placeholder="Select expiry date"
-                    value={formData.expiryDate}
-                    onChange={(val) => setFormData({...formData, expiryDate: val})}
-                  />
-                </div>
-              </div>
-
-              <div className="si-field-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <div className="si-field">
-                  <label className="si-label">Price (₹) *</label>
-                  <input
                     type="number"
+                    name="stockQty"
+                    value={formData.stockQty}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="si-field">
+                  <label className="si-label">MRP (₹)</label>
+                  <input
+                    className="si-input"
+                    type="number"
+                    name="mrp"
                     step="0.01"
-                    min="0"
-                    required
+                    value={formData.mrp}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="si-field">
+                  <label className="si-label">Purchase Price (₹)</label>
+                  <input
                     className="si-input"
-                    value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    type="number"
+                    name="purchasePrice"
+                    step="0.01"
+                    value={formData.purchasePrice}
+                    onChange={handleChange}
                   />
                 </div>
                 <div className="si-field">
-                  <label className="si-label">Current Stock *</label>
+                  <label className="si-label">Batch No</label>
                   <input
-                    type="number"
-                    min="0"
-                    required
                     className="si-input"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                    type="text"
+                    name="batchNo"
+                    value={formData.batchNo}
+                    onChange={handleChange}
                   />
                 </div>
+              </div>
+
+              <div className="si-field">
+                <label className="si-label">Expiry (MM/YYYY)</label>
+                <input
+                  className="si-input"
+                  type="text"
+                  name="expiry"
+                  placeholder="e.g. 12/2026"
+                  value={formData.expiry}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="pt-modal-footer">
@@ -315,7 +349,7 @@ export default function MedicinesPage() {
                   Cancel
                 </button>
                 <button type="submit" className="si-btn si-btn-primary">
-                  {editingId ? 'Update Medicine' : 'Save Medicine'}
+                  {editingId ? 'Save Changes' : 'Add Medicine'}
                 </button>
               </div>
             </form>
