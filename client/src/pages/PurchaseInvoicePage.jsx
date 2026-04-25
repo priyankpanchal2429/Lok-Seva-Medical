@@ -134,6 +134,43 @@ export default function PurchaseInvoicePage() {
     setInvoiceDate(new Date().toISOString().split('T')[0]);
   }, []);
 
+  const medicineSearchRef = React.useRef(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [medicineResults, setMedicineResults] = useState([]);
+  const [showMedicineResults, setShowMedicineResults] = useState(false);
+
+  useEffect(() => {
+    const fetchMeds = async () => {
+      if (searchQuery.trim().length > 1) {
+        try {
+          const { data } = await api.get(`/medicines?search=${searchQuery}`);
+          setMedicineResults(data);
+          setShowMedicineResults(true);
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        setMedicineResults([]);
+        setShowMedicineResults(false);
+      }
+    };
+    const delayDebounce = setTimeout(fetchMeds, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (supplierSearchRef.current && !supplierSearchRef.current.contains(event.target)) {
+        setShowSupplierResults(false);
+      }
+      if (medicineSearchRef.current && !medicineSearchRef.current.contains(event.target)) {
+        setShowMedicineResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // ---- Excel File Upload ----
 
   /** Parse uploaded Excel/CSV and populate item rows */
@@ -357,12 +394,56 @@ export default function PurchaseInvoicePage() {
 
       {/* ===== Add Item Bar ===== */}
       <div className="si-card si-search-section">
-        <div className="si-action-bar-label">
-          <span>Manage invoice items — add manually or upload from Excel</span>
+        <div className="si-search-bar" ref={medicineSearchRef} style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-text-muted)' }}>
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            className="si-search-input"
+            type="text"
+            placeholder="Search medicine by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => { if (medicineResults.length > 0) setShowMedicineResults(true); }}
+            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', color: 'var(--color-text)' }}
+          />
+          {showMedicineResults && medicineResults.length > 0 && (
+            <div className="si-autocomplete-dropdown" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '6px', maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', marginTop: '4px' }}>
+              {medicineResults.map(med => (
+                <div 
+                  key={med._id} 
+                  className="si-autocomplete-item" 
+                  style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid var(--color-border)' }}
+                  onClick={() => {
+                    setItems(prev => [...prev, {
+                      id: Date.now().toString(),
+                      name: med.name,
+                      batchNo: med.batchNo || '',
+                      expiry: med.expiry || '',
+                      qty: 1,
+                      purchasePrice: med.purchasePrice || 0,
+                      mrp: med.mrp || 0,
+                    }]);
+                    setSearchQuery('');
+                    setShowMedicineResults(false);
+                  }}
+                >
+                  <div style={{ fontWeight: '600', color: 'var(--color-text)' }}>{med.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', display: 'flex', gap: '10px' }}>
+                    <span>Stock: {med.stockQty}</span>
+                    <span>Purchase: ₹{med.purchasePrice}</span>
+                    <span>MRP: ₹{med.mrp}</span>
+                    {med.batchNo && <span>Batch: {med.batchNo}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <button className="si-btn si-btn-primary si-add-btn" onClick={handleAddItem}>
           <PlusIcon />
-          <span>Add Item</span>
+          <span>Add Custom Item</span>
         </button>
       </div>
 

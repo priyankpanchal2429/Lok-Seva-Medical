@@ -16,6 +16,7 @@ const patientRoutes = require('./routes/patientRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const salesInvoiceRoutes = require('./routes/salesInvoiceRoutes');
 const purchaseInvoiceRoutes = require('./routes/purchaseInvoiceRoutes');
+const medicineRoutes = require('./routes/medicineRoutes');
 const { globalLimiter } = require('./middleware/rateLimiter');
 
 
@@ -79,6 +80,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/sales-invoices', salesInvoiceRoutes);
 app.use('/api/purchase-invoices', purchaseInvoiceRoutes);
+app.use('/api/medicines', medicineRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

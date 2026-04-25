@@ -3,6 +3,7 @@
  * CRUD handlers for Purchase Invoice records.
  */
 const PurchaseInvoice = require('../models/PurchaseInvoice');
+const Medicine = require('../models/Medicine');
 
 // @desc  Get all purchase invoices (newest first)
 // @route GET /api/purchase-invoices
@@ -32,6 +33,26 @@ const getPurchaseInvoiceById = async (req, res) => {
 const createPurchaseInvoice = async (req, res) => {
   try {
     const invoice = await PurchaseInvoice.create(req.body);
+
+    if (invoice.status === 'saved' && invoice.items && invoice.items.length > 0) {
+      for (const item of invoice.items) {
+        if (!item.name) continue;
+        await Medicine.findOneAndUpdate(
+          { name: item.name },
+          {
+            $inc: { stockQty: item.qty || 0 },
+            $set: {
+              mrp: item.mrp || 0,
+              purchasePrice: item.purchasePrice || 0,
+              batchNo: item.batchNo || '',
+              expiry: item.expiry || ''
+            }
+          },
+          { upsert: true, new: true }
+        );
+      }
+    }
+
     res.status(201).json(invoice);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -58,8 +79,20 @@ const updatePurchaseInvoice = async (req, res) => {
 // @route DELETE /api/purchase-invoices/:id
 const deletePurchaseInvoice = async (req, res) => {
   try {
-    const invoice = await PurchaseInvoice.findByIdAndDelete(req.params.id);
+    const invoice = await PurchaseInvoice.findById(req.params.id);
     if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
+
+    if (invoice.status === 'saved' && invoice.items && invoice.items.length > 0) {
+      for (const item of invoice.items) {
+        if (!item.name) continue;
+        await Medicine.findOneAndUpdate(
+          { name: item.name },
+          { $inc: { stockQty: -(item.qty || 0) } }
+        );
+      }
+    }
+
+    await invoice.deleteOne();
     res.json({ message: 'Invoice deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
