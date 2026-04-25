@@ -12,6 +12,7 @@ import SalesInvoicePage from './pages/SalesInvoicePage';
 import PurchaseInvoicePage from './pages/PurchaseInvoicePage';
 import PatientPage from './pages/PatientPage';
 import SupplierPage from './pages/SupplierPage';
+import MedicinesPage from './pages/MedicinesPage';
 import MainLayout from './components/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { performLogout } from './utils/auth';
@@ -89,6 +90,7 @@ export default function App() {
           <Route path="/purchase-invoice" element={<PurchaseInvoicePage />} />
           <Route path="/patients" element={<PatientPage />} />
           <Route path="/suppliers" element={<SupplierPage />} />
+          <Route path="/medicines" element={<MedicinesPage />} />
         </Route>
 
         {/* Catch-all: redirect to login */}

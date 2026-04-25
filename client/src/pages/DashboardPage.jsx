@@ -193,7 +193,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Data Tables */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         
         {/* Expiring Medicines Table */}
         <div className="si-card si-table-card" style={{ marginBottom: 0 }}>
@@ -208,18 +208,18 @@ export default function DashboardPage() {
               <thead>
                 <tr>
                   <th className="si-th">Medicine Name</th>
-                  <th className="si-th">Batch No.</th>
-                  <th className="si-th">Stock</th>
-                  <th className="si-th text-right">Expiry Date</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Batch No.</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Stock</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Expiry Date</th>
                 </tr>
               </thead>
               <tbody>
                 {data.expiringMedicines.map(item => (
                   <tr key={item.id} className="si-table-row">
                     <td className="si-td font-medium">{item.name}</td>
-                    <td className="si-td text-muted">{item.batch}</td>
-                    <td className="si-td">{item.stock}</td>
-                    <td className="si-td text-right" style={{ color: 'var(--color-warning)', fontWeight: 600 }}>{item.expiry}</td>
+                    <td className="si-td text-muted" style={{ textAlign: 'center' }}>{item.batch}</td>
+                    <td className="si-td" style={{ textAlign: 'center' }}>{item.stock}</td>
+                    <td className="si-td" style={{ textAlign: 'center', color: 'var(--color-warning)', fontWeight: 600 }}>{item.expiry}</td>
                   </tr>
                 ))}
                 {data.expiringMedicines.length === 0 && (
@@ -245,18 +245,18 @@ export default function DashboardPage() {
               <thead>
                 <tr>
                   <th className="si-th">Medicine Name</th>
-                  <th className="si-th">Batch No.</th>
-                  <th className="si-th">Supplier</th>
-                  <th className="si-th text-right">Current Stock</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Batch No.</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Supplier</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Current Stock</th>
                 </tr>
               </thead>
               <tbody>
                 {data.lowStockMedicines.map(item => (
                   <tr key={item.id} className="si-table-row">
                     <td className="si-td font-medium">{item.name}</td>
-                    <td className="si-td text-muted">{item.batch}</td>
-                    <td className="si-td text-muted">{item.supplier}</td>
-                    <td className="si-td text-right">
+                    <td className="si-td text-muted" style={{ textAlign: 'center' }}>{item.batch}</td>
+                    <td className="si-td text-muted" style={{ textAlign: 'center' }}>{item.supplier}</td>
+                    <td className="si-td" style={{ textAlign: 'center' }}>
                       <span className="pt-badge" style={{ backgroundColor: 'var(--color-danger)', color: '#fff' }}>
                         {item.stock} Left
                       </span>

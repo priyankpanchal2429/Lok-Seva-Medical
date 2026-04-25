@@ -185,7 +185,16 @@ export default function DatePicker({
   const getPosition = useCallback(() => {
     if (!inputRef.current) return { top: 0, left: 0 };
     const rect = inputRef.current.getBoundingClientRect();
-    return { top: rect.bottom + 4, left: rect.left };
+    
+    let left = rect.left;
+    const dropdownWidth = 320; // Estimated width of the calendar
+    
+    // Prevent clipping on the right edge of the screen
+    if (left + dropdownWidth > window.innerWidth - 20) {
+      left = Math.max(20, window.innerWidth - dropdownWidth - 20);
+    }
+    
+    return { top: rect.bottom + 4, left };
   }, []);
 
   const pos = isOpen ? getPosition() : { top: 0, left: 0 };

@@ -11,7 +11,7 @@ export default defineConfig({
     port: 5174,
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'https://lok-seva-medical.onrender.com',
         changeOrigin: true,
         secure: false,
       },

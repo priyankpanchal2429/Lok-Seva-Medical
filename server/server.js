@@ -14,6 +14,8 @@ const config = require('./config/env');
 const authRoutes = require('./routes/authRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
+const salesInvoiceRoutes = require('./routes/salesInvoiceRoutes');
+const purchaseInvoiceRoutes = require('./routes/purchaseInvoiceRoutes');
 const { globalLimiter } = require('./middleware/rateLimiter');
 
 
@@ -50,7 +52,7 @@ app.use(globalLimiter);
 // Parsing Middleware
 // ============================================================
 
-app.use(express.json({ limit: '1kb' })); // Small payload limit for login
+app.use(express.json({ limit: '500kb' })); // Increased limit for invoice payloads
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
@@ -75,6 +77,8 @@ if (config.nodeEnv !== 'test') {
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/sales-invoices', salesInvoiceRoutes);
+app.use('/api/purchase-invoices', purchaseInvoiceRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

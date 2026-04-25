@@ -8,6 +8,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import DatePicker from '../components/DatePicker';
 import * as XLSX from 'xlsx';
+import PurchaseInvoiceHistoryPage from './PurchaseInvoiceHistoryPage';
 
 // ============================================================
 // SVG Icons (reused from Sales Invoice pattern)
@@ -63,6 +64,13 @@ const SaveIcon = () => (
 export default function PurchaseInvoicePage() {
   const { user } = useOutletContext();
   const fileInputRef = useRef(null);
+
+  // Tab state: 'history' is the default view; 'create' shows the form
+  const [activeTab, setActiveTab] = useState('history');
+
+  // Save state
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Invoice Meta State
   const [supplierName, setSupplierName] = useState('');
@@ -185,38 +193,94 @@ export default function PurchaseInvoicePage() {
     fileInputRef.current?.click();
   }, []);
 
+  /** Save purchase invoice to API */
+  const handleSavePurchase = useCallback(async () => {
+    if (items.length === 0) {
+      setSaveError('Please add at least one item before saving.');
+      return;
+    }
+    setSaveError('');
+    setIsSaving(true);
+    try {
+      const payload = {
+        invoiceNumber,
+        invoiceDate,
+        supplierName,
+        supplierPhone,
+        supplierGst,
+        items: items.map(({ id, ...rest }) => rest),
+        subtotal,
+        cgst,
+        sgst,
+        grandTotal,
+        amountPaid,
+        balance,
+        status: 'saved',
+        receivedBy: user?.name || '',
+      };
+      const res = await fetch('/api/purchase-invoices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Failed to save purchase invoice');
+      setActiveTab('history');
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [items, invoiceNumber, invoiceDate, supplierName, supplierPhone, supplierGst,
+      subtotal, cgst, sgst, grandTotal, amountPaid, balance, user]);
+
   return (
     <div className="si-page">
-      {/* Hidden file input for Excel upload */}
-      <input
-        type="file"
-        accept=".xlsx, .xls, .csv"
-        ref={fileInputRef}
-        style={{ display: 'none' }}
-        onChange={handleFileUpload}
-      />
+      {/* Hidden file input */}
+      <input type="file" accept=".xlsx, .xls, .csv" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
 
       {/* ===== Page Header ===== */}
       <div className="si-page-header">
         <div>
           <h2 className="si-page-title">Purchase Invoice</h2>
-          <p className="si-page-subtitle">Record incoming stock and supplier invoices</p>
+          <p className="si-page-subtitle">
+            {activeTab === 'history' ? 'All saved purchase invoices' : 'Record incoming stock and supplier invoices'}
+          </p>
         </div>
         <div className="si-header-actions">
-          <button className="si-btn si-btn-outline" onClick={handleClearInvoice}>
-            <ClearIcon />
-            <span>Clear</span>
-          </button>
-          <button className="si-btn si-btn-secondary" onClick={triggerFileInput}>
-            <UploadIcon />
-            <span>Upload Excel</span>
-          </button>
-          <button className="si-btn si-btn-primary">
-            <SaveIcon />
-            <span>Save Purchase</span>
-          </button>
+          {activeTab === 'history' ? (
+            <button className="si-btn si-btn-primary" onClick={() => setActiveTab('create')}>
+              + Add New Purchase
+            </button>
+          ) : (
+            <>
+              {saveError && <span style={{ fontSize: '13px', color: 'var(--color-danger)' }}>{saveError}</span>}
+              <button className="si-btn si-btn-outline" onClick={() => setActiveTab('history')} disabled={isSaving}>
+                ← Back
+              </button>
+              <button className="si-btn si-btn-outline" onClick={handleClearInvoice} disabled={isSaving}>
+                <ClearIcon /><span>Clear</span>
+              </button>
+              <button className="si-btn si-btn-secondary" onClick={triggerFileInput} disabled={isSaving}>
+                <UploadIcon /><span>Upload Excel</span>
+              </button>
+              <button className="si-btn si-btn-primary" onClick={handleSavePurchase} disabled={isSaving}>
+                <SaveIcon /><span>{isSaving ? 'Saving...' : 'Save Purchase'}</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
+
+      {/* ===== History View ===== */}
+      {activeTab === 'history' && (
+        <PurchaseInvoiceHistoryPage embedded onNewPurchase={() => setActiveTab('create')} />
+      )}
+
+      {/* ===== Create Form ===== */}
+      {activeTab === 'create' && <>
 
       {/* ===== Supplier & Invoice Meta ===== */}
       <div className="si-meta-row">
@@ -461,6 +525,7 @@ export default function PurchaseInvoicePage() {
           </div>
         </div>
       </div>
+      </>}
     </div>
   );
 }

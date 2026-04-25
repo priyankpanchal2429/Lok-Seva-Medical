@@ -101,14 +101,29 @@ const PurchaseInvoiceIcon = () => (
   </svg>
 );
 
+const MedicinesIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10.5 20.5l-6-6a4.95 4.95 0 1 1 7-7l6 6a4.95 4.95 0 1 1-7 7z"></path>
+    <line x1="8.5" y1="8.5" x2="15.5" y2="15.5"></line>
+  </svg>
+);
+
+const HistoryIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="1 4 1 10 7 10"></polyline>
+    <path d="M3.51 15a9 9 0 1 0 .49-4.9L1 10"></path>
+  </svg>
+);
+
 // ============================================================
 // Navigation Items Configuration
 // ============================================================
 const NAV_ITEMS = [
-  { key: 'dashboard', label: 'Dashboard', icon: DashboardIcon, path: '/dashboard' },
-  { key: 'patients', label: 'Patients', icon: PatientIcon, path: '/patients' },
-  { key: 'suppliers', label: 'Suppliers', icon: SupplierIcon, path: '/suppliers' },
-  { key: 'sales-invoice', label: 'Sales Invoice', icon: SalesInvoiceIcon, path: '/sales-invoice' },
+  { key: 'dashboard',        label: 'Dashboard',       icon: DashboardIcon,       path: '/dashboard' },
+  { key: 'medicines',        label: 'Medicines',        icon: MedicinesIcon,       path: '/medicines' },
+  { key: 'patients',         label: 'Patients',         icon: PatientIcon,         path: '/patients' },
+  { key: 'suppliers',        label: 'Suppliers',        icon: SupplierIcon,        path: '/suppliers' },
+  { key: 'sales-invoice',    label: 'Sales Invoice',    icon: SalesInvoiceIcon,    path: '/sales-invoice' },
   { key: 'purchase-invoice', label: 'Purchase Invoice', icon: PurchaseInvoiceIcon, path: '/purchase-invoice' },
 ];
 
@@ -181,27 +196,38 @@ export default function MainLayout({ user }) {
       {/* ===== Top Header Bar ===== */}
       <header className="layout-header">
         <div className="layout-header-inner">
+          {/* === Logo (left) === */}
           <div className="layout-header-left">
-            <h1 className="layout-store-name">Lok Seva Medical Store</h1>
-
-            {/* Top Navigation */}
-            <nav className="layout-top-nav">
-              {NAV_ITEMS.map((item) => {
-                const isActive = location.pathname === item.path;
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.key}
-                    className={`top-nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => navigate(item.path)}
-                  >
-                    <Icon />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
+            <div className="layout-store-name" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="M12 8v8"></path>
+                <path d="M8 12h8"></path>
+              </svg>
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-text)', lineHeight: 1.1, letterSpacing: '-0.5px' }}>Lok Seva</div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-primary)', letterSpacing: '0.8px', textTransform: 'uppercase', marginTop: '2px' }}>Medical Store</div>
+              </div>
+            </div>
           </div>
+
+          {/* === Navigation (center) === */}
+          <nav className="layout-top-nav">
+            {NAV_ITEMS.map((item) => {
+              const isActive = location.pathname === item.path;
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.key}
+                  className={`top-nav-item ${isActive ? 'active' : ''}`}
+                  onClick={() => navigate(item.path)}
+                >
+                  <Icon />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
           <div className="layout-header-right">
             {/* Financial Year Dropdown */}
             <div className="fy-selector-container" ref={fyDropdownRef}>

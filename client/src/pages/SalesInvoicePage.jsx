@@ -7,6 +7,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import DatePicker from '../components/DatePicker';
+import SalesInvoiceHistoryPage from './SalesInvoiceHistoryPage';
 
 // ============================================================
 // SVG Icons
@@ -79,6 +80,13 @@ const generateInvoiceNumber = () => {
 export default function SalesInvoicePage() {
   const { user } = useOutletContext();
   const searchInputRef = useRef(null);
+
+  // Tab state: 'history' is the default view; 'create' shows the form
+  const [activeTab, setActiveTab] = useState('history');
+
+  // Save state
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Invoice metadata
   const [invoiceNumber] = useState(generateInvoiceNumber);
@@ -223,13 +231,64 @@ export default function SalesInvoicePage() {
   const discountAmount = subtotal * (discountPercent / 100);
   const grandTotal = subtotal + taxTotal - discountAmount;
 
-  const handlePrint = useCallback(() => {
+  /** Build the payload object to send to the API */
+  const buildPayload = useCallback((status) => ({
+    invoiceNumber,
+    invoiceDate,
+    patientName,
+    patientAge,
+    patientPhone,
+    patientAddress,
+    doctorName,
+    items: items.map(({ id, ...rest }) => rest), // strip client-only id
+    subtotal,
+    cgst,
+    sgst,
+    discountPercent,
+    discountAmount,
+    grandTotal,
+    status,
+    createdBy: user?.name || '',
+  }), [invoiceNumber, invoiceDate, patientName, patientAge, patientPhone,
+       patientAddress, doctorName, items, subtotal, cgst, sgst,
+       discountPercent, discountAmount, grandTotal, user]);
+
+  /** Save to API with given status, optional callback on success */
+  const saveInvoice = useCallback(async (status, onSuccess) => {
     if (items.length === 0) {
-      alert('Please add at least one item to the invoice.');
+      setSaveError('Please add at least one item before saving.');
       return;
     }
-    window.print();
-  }, [items]);
+    setSaveError('');
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/sales-invoices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}`,
+        },
+        body: JSON.stringify(buildPayload(status)),
+      });
+      if (!res.ok) throw new Error('Failed to save invoice');
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [items, buildPayload]);
+
+  const handleSaveDraft = useCallback(() => {
+    saveInvoice('draft', () => setActiveTab('history'));
+  }, [saveInvoice]);
+
+  const handleSaveAndPrint = useCallback(() => {
+    saveInvoice('saved', () => {
+      window.print();
+      setActiveTab('history');
+    });
+  }, [saveInvoice]);
 
   return (
     <div className="si-page">
@@ -237,23 +296,44 @@ export default function SalesInvoicePage() {
       <div className="si-page-header">
         <div>
           <h2 className="si-page-title">Sales Invoice</h2>
-          <p className="si-page-subtitle">Create a new billing invoice</p>
+          <p className="si-page-subtitle">
+            {activeTab === 'history' ? 'All saved and draft invoices' : 'Create a new billing invoice'}
+          </p>
         </div>
         <div className="si-header-actions">
-          <button className="si-btn si-btn-outline" onClick={handleClearInvoice}>
-            <ClearIcon />
-            <span>Clear</span>
-          </button>
-          <button className="si-btn si-btn-secondary">
-            <SaveIcon />
-            <span>Save Draft</span>
-          </button>
-          <button className="si-btn si-btn-primary" onClick={handlePrint}>
-            <PrinterIcon />
-            <span>Save & Print</span>
-          </button>
+          {activeTab === 'history' ? (
+            /* History view — single Add New button */
+            <button className="si-btn si-btn-primary" onClick={() => setActiveTab('create')}>
+              + Add New Invoice
+            </button>
+          ) : (
+            /* Create form — action buttons + Back */
+            <>
+              {saveError && <span style={{ fontSize: '13px', color: 'var(--color-danger)' }}>{saveError}</span>}
+              <button className="si-btn si-btn-outline" onClick={() => setActiveTab('history')} disabled={isSaving}>
+                ← Back
+              </button>
+              <button className="si-btn si-btn-outline" onClick={handleClearInvoice} disabled={isSaving}>
+                <ClearIcon /><span>Clear</span>
+              </button>
+              <button className="si-btn si-btn-secondary" onClick={handleSaveDraft} disabled={isSaving}>
+                <SaveIcon /><span>{isSaving ? 'Saving...' : 'Save Draft'}</span>
+              </button>
+              <button className="si-btn si-btn-primary" onClick={handleSaveAndPrint} disabled={isSaving}>
+                <PrinterIcon /><span>{isSaving ? 'Saving...' : 'Save & Print'}</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
+
+      {/* ===== History View ===== */}
+      {activeTab === 'history' && (
+        <SalesInvoiceHistoryPage embedded onNewInvoice={() => setActiveTab('create')} />
+      )}
+
+      {/* ===== Create Invoice Form ===== */}
+      {activeTab === 'create' && <>
 
       {/* ===== Invoice Meta + Patient Info ===== */}
       <div className="si-meta-row">
@@ -517,6 +597,7 @@ export default function SalesInvoicePage() {
           </div>
         </div>
       </div>
+      </>}
     </div>
   );
 }

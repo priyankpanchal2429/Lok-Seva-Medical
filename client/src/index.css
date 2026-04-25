@@ -27,20 +27,22 @@
   --color-primary-light: #E0F0F5;
 
   /* Backgrounds */
-  --color-bg: #FAFAFA;
-  --color-surface: #F8F9F9;
+  --color-bg: #F1F5F9;
+  --color-surface: #FFFFFF;
 
   /* Text */
-  --color-text: #1A1A1A;
-  --color-text-secondary: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-text: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
 
   /* Borders */
-  --color-border: #E5E7EB;
+  --color-border: #CBD5E1;
 
-  /* Error */
+  /* Status Colors */
   --color-error: #DC2626;
   --color-error-bg: #FEF2F2;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
 
   /* Input focus */
   --color-focus-ring: rgba(42, 122, 157, 0.25);
@@ -69,9 +71,11 @@
   /* Borders */
   --color-border: #333333;
 
-  /* Error */
+  /* Status Colors */
   --color-error: #F87171;
   --color-error-bg: #2D1B1B;
+  --color-danger: #F87171;
+  --color-warning: #FBBF24;
 
   /* Input focus */
   --color-focus-ring: rgba(74, 155, 190, 0.3);
@@ -552,16 +556,16 @@ body {
 .layout-header-inner {
   width: 100%;
   max-width: 1770px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 0.7fr auto 1fr;  /* Smaller left pushes nav left */
   align-items: center;
-  justify-content: space-between;
   padding: 12px 24px;
 }
 
 .layout-header-left {
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: flex-start;
 }
 
 .layout-store-name {
@@ -575,6 +579,7 @@ body {
 .layout-header-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 16px;
 }
 
@@ -583,19 +588,19 @@ body {
 .layout-top-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .top-nav-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 8px;
+  padding: 10px 18px;
   border-radius: 6px;
   background: none;
   border: none;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -603,8 +608,8 @@ body {
 }
 
 .top-nav-item svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .top-nav-item:hover {
@@ -1089,7 +1094,7 @@ input[type="number"] {
   border: 1px solid var(--color-border);
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-  min-width: 290px;
+  min-width: 250px;
   animation: dpFadeIn 0.15s ease;
   font-family: 'Inter', sans-serif;
   user-select: none;
@@ -1106,7 +1111,7 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 14px 10px;
+  padding: 10px 10px 6px;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -1114,8 +1119,8 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   border: none;
   background: none;
   border-radius: 6px;
@@ -1132,19 +1137,19 @@ input[type="number"] {
 .dp-selectors {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .dp-select {
   appearance: auto;
   background: none;
   border: none;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--color-text);
   cursor: pointer;
   font-family: 'Inter', sans-serif;
-  padding: 4px 2px;
+  padding: 2px 2px;
 }
 
 .dp-select:focus {
@@ -1154,7 +1159,7 @@ input[type="number"] {
 /* --- Day Calendar Grid --- */
 
 .dp-calendar {
-  padding: 8px 14px 14px;
+  padding: 6px 10px 10px;
 }
 
 .dp-day-headers {
@@ -1165,10 +1170,10 @@ input[type="number"] {
 
 .dp-day-header {
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--color-text-secondary);
-  padding: 8px 0;
+  padding: 6px 0;
 }
 
 .dp-day-grid {
@@ -1181,15 +1186,15 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   margin: 0 auto;
   border: none;
   background: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text);
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.12s ease;
   font-family: 'Inter', sans-serif;
@@ -1222,19 +1227,19 @@ input[type="number"] {
 .dp-month-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 14px;
+  gap: 6px;
+  padding: 10px;
 }
 
 .dp-month-cell {
-  padding: 14px 8px;
+  padding: 10px 6px;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text);
   background: none;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.12s ease;
   font-family: 'Inter', sans-serif;
@@ -1396,11 +1401,14 @@ input[type="number"] {
 .pt-badge {
   background-color: var(--color-primary-light);
   color: var(--color-primary);
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 700;
-  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
 }
 
 .pt-icon-btn {
@@ -1437,24 +1445,27 @@ input[type="number"] {
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end; /* Align to the right side */
   z-index: 1000;
   backdrop-filter: blur(4px);
 }
 
 .pt-modal {
   background-color: var(--color-surface);
-  border-radius: 12px;
+  border-radius: 16px 0 0 16px; /* Rounded only on the left */
   width: 100%;
   max-width: 650px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
-  animation: modalEnter 0.3s ease-out;
+  height: 100vh; /* Full height */
+  box-shadow: -10px 0 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Hide overflow to let body handle scrolling */
+  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes modalEnter {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+@keyframes modalSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 .pt-modal-header {
@@ -1490,6 +1501,8 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .pt-modal-footer {
@@ -1499,6 +1512,7 @@ input[type="number"] {
   justify-content: flex-end;
   gap: 12px;
   border-top: 1px solid var(--color-border);
+  margin-top: auto;
 }
 
 /* ============================================================
