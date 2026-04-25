@@ -1,181 +1,249 @@
 /**
  * DashboardPage Component
- * Displays key metrics: Total Sales, Expiring Medicines, Low Stock.
+ * Displays key metrics: Sales Outstanding, Purchase Outstanding,
+ * Expiring Medicines, Low Stock alerts.
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import DateRangePicker from '../components/DateRangePicker';
+import api from '../utils/api';
 
 // ============================================================
 // SVG Icons
 // ============================================================
 
+const RefreshIcon = ({ spinning }) => (
+  <svg
+    className={spinning ? 'spin-animation' : ''}
+    width="16" height="16" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+  >
+    <polyline points="23 4 23 10 17 10"></polyline>
+    <polyline points="1 20 1 14 7 14"></polyline>
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+  </svg>
+);
+
+const ArrowUpIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="19" x2="12" y2="5"></line>
+    <polyline points="5 12 12 5 19 12"></polyline>
+  </svg>
+);
+
+const ArrowDownIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"></line>
+    <polyline points="19 12 12 19 5 12"></polyline>
+  </svg>
+);
 
 // ============================================================
-// Mock Data (Replace with API fetch later)
+// Outstanding Card Component
 // ============================================================
 
-const MOCK_DATA = {
-  totalSales: 124500.00,
-  expiringMedicines: [
-    { id: '1', name: 'Amoxicillin 500mg', batch: 'AMX-2023', expiry: '2026-04-28', stock: 45 },
-    { id: '2', name: 'Paracetamol 650mg', batch: 'PCM-109', expiry: '2026-04-30', stock: 120 },
-    { id: '3', name: 'Cetirizine 10mg', batch: 'CET-88', expiry: '2026-05-01', stock: 30 },
-  ],
-  lowStockMedicines: [
-    { id: '4', name: 'Azithromycin 250mg', batch: 'AZ-44', stock: 1, supplier: 'PharmaCorp Inc.' },
-    { id: '5', name: 'Ibuprofen 400mg', batch: 'IBU-99', stock: 0, supplier: 'MedLife Distributors' },
-  ]
-};
+/**
+ * Renders a single outstanding card with aging breakdown and progress bar.
+ * @param {object} props
+ * @param {'sales'|'purchase'} props.type - Card type
+ * @param {object} props.data - { total, aging: { current, '1-15', '16-30', '30+' }, invoiceCount }
+ */
+function OutstandingCard({ type, data }) {
+  const isSales = type === 'sales';
+  const title = isSales ? 'Sales Outstanding' : 'Purchase Outstanding';
+  const subtitle = isSales ? 'Total Receivables' : 'Total Payables';
+  const accentColor = isSales ? '#00cc99' : '#6366f1';
+  const icon = isSales ? <ArrowDownIcon /> : <ArrowUpIcon />;
+
+  const total = data?.total || 0;
+  const aging = data?.aging || { current: 0, '1-15': 0, '16-30': 0, '30+': 0 };
+  const invoiceCount = data?.invoiceCount || 0;
+
+  // Aging bucket config
+  const buckets = [
+    { key: 'current', label: 'Current',     color: '#00cc99', sublabel: 'Not due'   },
+    { key: '1-15',    label: '1-15 Days',   color: '#f59e0b', sublabel: 'Overdue'   },
+    { key: '16-30',   label: '16-30 Days',  color: '#f97316', sublabel: 'Overdue'   },
+    { key: '30+',     label: '30+ Days',    color: '#ef4444', sublabel: 'Overdue'   },
+  ];
+
+  // Calculate progress bar segment widths
+  const segments = buckets.map(b => ({
+    ...b,
+    amount: aging[b.key] || 0,
+    width: total > 0 ? ((aging[b.key] || 0) / total) * 100 : 0,
+  }));
+
+  return (
+    <div className="db-outstanding-card">
+      {/* Header */}
+      <div className="db-outstanding-header">
+        <div className="db-outstanding-title-row">
+          <div className="db-outstanding-icon" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
+            {icon}
+          </div>
+          <h3 className="db-outstanding-title">{title}</h3>
+          <span className="db-outstanding-badge">{invoiceCount} invoices</span>
+        </div>
+      </div>
+
+      {/* Total Amount */}
+      <div className="db-outstanding-total">
+        <span className="db-outstanding-total-label">{subtitle}</span>
+        <span className="db-outstanding-total-amount" style={{ color: accentColor }}>
+          ₹ {total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+        </span>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="db-outstanding-bar-track">
+        {segments.map(seg => (
+          seg.width > 0 && (
+            <div
+              key={seg.key}
+              className="db-outstanding-bar-segment"
+              style={{ width: `${seg.width}%`, backgroundColor: seg.color }}
+              title={`${seg.label}: ₹${seg.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
+            />
+          )
+        ))}
+        {total === 0 && <div className="db-outstanding-bar-segment db-outstanding-bar-empty" />}
+      </div>
+
+      {/* Aging Breakdown */}
+      <div className="db-outstanding-aging">
+        {segments.map(seg => (
+          <div key={seg.key} className="db-outstanding-aging-item">
+            <div className="db-outstanding-aging-dot" style={{ backgroundColor: seg.color }} />
+            <div className="db-outstanding-aging-info">
+              <span className="db-outstanding-aging-amount">
+                ₹ {seg.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </span>
+              <span className="db-outstanding-aging-label">{seg.label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ============================================================
-// Component
+// Dashboard Component
 // ============================================================
 
 export default function DashboardPage() {
   const { user } = useOutletContext();
   const navigate = useNavigate();
-  
-  const [data, setData] = useState(MOCK_DATA);
-  const [lastUpdated, setLastUpdated] = useState('Just now');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [dateRange, setDateRange] = useState({ start: '24-10-2025', end: '24-04-2026' });
 
-  /** Simulate fetching fresh data from backend */
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState('');
+
+  // Outstanding data
+  const [outstandingData, setOutstandingData] = useState({
+    sales: { total: 0, aging: { current: 0, '1-15': 0, '16-30': 0, '30+': 0 }, invoiceCount: 0 },
+    purchase: { total: 0, aging: { current: 0, '1-15': 0, '16-30': 0, '30+': 0 }, invoiceCount: 0 },
+  });
+
+  // Medicine alerts
+  const [expiringMedicines, setExpiringMedicines] = useState([]);
+  const [lowStockMedicines, setLowStockMedicines] = useState([]);
+
+  /** Fetch all dashboard data */
+  const fetchDashboard = useCallback(async () => {
+    try {
+      // Fetch outstanding data
+      const { data: outstanding } = await api.get('/dashboard/outstanding');
+      setOutstandingData(outstanding);
+
+      // Fetch medicines for alerts
+      const { data: medicines } = await api.get('/medicines');
+
+      // Expiring in 30 days
+      const now = new Date();
+      const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const expiring = medicines.filter(m => {
+        if (!m.expiry) return false;
+        const exp = new Date(m.expiry + '-01');
+        return exp <= thirtyDaysLater && exp >= now;
+      });
+      setExpiringMedicines(expiring.slice(0, 10));
+
+      // Low stock (qty <= 5)
+      const lowStock = medicines.filter(m => (m.stockQty || 0) <= 5);
+      setLowStockMedicines(lowStock.slice(0, 10));
+
+      setLastUpdated(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }));
+    } catch (err) {
+      console.error('Dashboard fetch error:', err);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => fetchDashboard(), 0);
+    return () => clearTimeout(timer);
+  }, [fetchDashboard]);
+
   const handleRefresh = () => {
     setIsRefreshing(true);
-    // Simulate API delay
-    setTimeout(() => {
-      setData({ ...MOCK_DATA }); // In a real app, this would be a fresh fetch
-      setLastUpdated('Just now');
-      setIsRefreshing(false);
-    }, 800);
+    fetchDashboard();
   };
 
-  const handleApplyDateRange = (start, end) => {
-    setDateRange({ start, end });
-    setIsDatePickerOpen(false);
-    handleRefresh(); // Refresh data for the new range
-  };
+  if (isLoading) {
+    return (
+      <div className="si-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <div className="db-loading-spinner" />
+      </div>
+    );
+  }
 
   return (
     <div className="si-page">
-      {/* Header */}
+      {/* ===== Header ===== */}
       <div className="si-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '20px' }}>
         <div>
           <h2 className="si-page-title">Dashboard</h2>
           <p className="si-page-subtitle">Welcome back, {user?.name || 'User'}. Here is your overview.</p>
         </div>
-
-        {/* Action Bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '4px' }}>
-          <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
-            Last Updated: {lastUpdated}
-          </span>
-          
-          {/* Date Range Display - Using Standard App Button Style */}
-          <button 
-            className="si-btn si-btn-primary" 
-            onClick={() => setIsDatePickerOpen(true)}
-          >
-            <span>{dateRange.start} To {dateRange.end}</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-          </button>
-
-          {/* Refresh Button - Using Standard App Button Style */}
-          <button 
-            className={`si-btn si-btn-primary ${isRefreshing ? 'si-btn-loading' : ''}`} 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+          {lastUpdated && (
+            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+              Updated {lastUpdated}
+            </span>
+          )}
+          <button
+            className={`si-btn si-btn-outline ${isRefreshing ? 'si-btn-loading' : ''}`}
             onClick={handleRefresh}
             disabled={isRefreshing}
           >
+            <RefreshIcon spinning={isRefreshing} />
             <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
-            <svg 
-              className={isRefreshing ? 'spin-animation' : ''} 
-              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <polyline points="1 20 1 14 7 14"></polyline>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-            </svg>
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '32px', marginBottom: '24px' }}>
-        {/* Total Sales Card */}
-        <div className="si-card" style={{ marginBottom: 0, padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Sales</h3>
-            <div style={{ width: '32px', height: '32px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 204, 153, 0.1)', color: 'var(--color-primary)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 3h12"></path>
-                <path d="M6 8h12"></path>
-                <path d="M6 13l8.5 8"></path>
-                <path d="M6 8a6 6 0 0 0 9 0"></path>
-              </svg>
-            </div>
-          </div>
-          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-text)', marginTop: '4px' }}>
-            ₹ {data.totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Current Financial Year</div>
-        </div>
-
-        {/* Expiring Medicines Card */}
-        <div className="si-card" style={{ marginBottom: 0, padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expiring in 7 Days</h3>
-            <div style={{ width: '32px', height: '32px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-            </div>
-          </div>
-          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-text)', marginTop: '4px' }}>
-            {data.expiringMedicines.length} Items
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--color-warning)' }}>Requires attention</div>
-        </div>
-
-        {/* Low Stock Card */}
-        <div className="si-card" style={{ marginBottom: 0, padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Low Stock (Under 2)</h3>
-            <div style={{ width: '32px', height: '32px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-danger)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-              </svg>
-            </div>
-          </div>
-          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-text)', marginTop: '4px' }}>
-            {data.lowStockMedicines.length} Items
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--color-danger)' }}>Needs reordering</div>
-        </div>
+      {/* ===== Outstanding Cards ===== */}
+      <div className="db-outstanding-grid">
+        <OutstandingCard type="sales" data={outstandingData.sales} />
+        <OutstandingCard type="purchase" data={outstandingData.purchase} />
       </div>
 
-      {/* Data Tables */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        
-        {/* Expiring Medicines Table */}
+      {/* ===== Alert Tables ===== */}
+      <div className="db-tables-grid">
+
+        {/* Expiring Medicines */}
         <div className="si-card si-table-card" style={{ marginBottom: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--color-border)' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text)' }}>Expiring Medicines</h3>
-            <button className="si-btn si-btn-outline si-btn-sm" onClick={() => navigate('/purchase-invoice')}>
-              Review Stock
+          <div className="db-table-header">
+            <div>
+              <h3 className="db-table-title">Expiring Soon</h3>
+              <span className="db-table-subtitle">Medicines expiring within 30 days</span>
+            </div>
+            <button className="si-btn si-btn-outline si-btn-sm" onClick={() => navigate('/medicines')}>
+              View All
             </button>
           </div>
           <div style={{ overflowX: 'auto' }}>
@@ -183,36 +251,40 @@ export default function DashboardPage() {
               <thead>
                 <tr>
                   <th className="si-th">Medicine Name</th>
-                  <th className="si-th" style={{ textAlign: 'center' }}>Batch No.</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Batch</th>
                   <th className="si-th" style={{ textAlign: 'center' }}>Stock</th>
-                  <th className="si-th" style={{ textAlign: 'center' }}>Expiry Date</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Expiry</th>
                 </tr>
               </thead>
               <tbody>
-                {data.expiringMedicines.map(item => (
-                  <tr key={item.id} className="si-table-row">
-                    <td className="si-td font-medium">{item.name}</td>
-                    <td className="si-td text-muted" style={{ textAlign: 'center' }}>{item.batch}</td>
-                    <td className="si-td" style={{ textAlign: 'center' }}>{item.stock}</td>
-                    <td className="si-td" style={{ textAlign: 'center', color: 'var(--color-warning)', fontWeight: 600 }}>{item.expiry}</td>
-                  </tr>
-                ))}
-                {data.expiringMedicines.length === 0 && (
+                {expiringMedicines.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="si-empty-row">No medicines expiring soon.</td>
+                    <td colSpan="4" className="si-empty-row">No medicines expiring soon. ✅</td>
                   </tr>
+                ) : (
+                  expiringMedicines.map(item => (
+                    <tr key={item._id} className="si-table-row">
+                      <td className="si-td" style={{ fontWeight: 600 }}>{item.name}</td>
+                      <td className="si-td" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>{item.batchNo || '—'}</td>
+                      <td className="si-td" style={{ textAlign: 'center' }}>{item.stockQty || 0}</td>
+                      <td className="si-td" style={{ textAlign: 'center', color: 'var(--color-warning)', fontWeight: 600 }}>{item.expiry || '—'}</td>
+                    </tr>
+                  ))
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Low Stock Table */}
+        {/* Low Stock */}
         <div className="si-card si-table-card" style={{ marginBottom: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--color-border)' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text)' }}>Low Stock Alert</h3>
-            <button className="si-btn si-btn-outline si-btn-sm" onClick={() => navigate('/suppliers')}>
-              Contact Suppliers
+          <div className="db-table-header">
+            <div>
+              <h3 className="db-table-title">Low Stock Alert</h3>
+              <span className="db-table-subtitle">Items with 5 or fewer units remaining</span>
+            </div>
+            <button className="si-btn si-btn-outline si-btn-sm" onClick={() => navigate('/purchase-invoice')}>
+              Reorder
             </button>
           </div>
           <div style={{ overflowX: 'auto' }}>
@@ -220,43 +292,35 @@ export default function DashboardPage() {
               <thead>
                 <tr>
                   <th className="si-th">Medicine Name</th>
-                  <th className="si-th" style={{ textAlign: 'center' }}>Batch No.</th>
-                  <th className="si-th" style={{ textAlign: 'center' }}>Supplier</th>
-                  <th className="si-th" style={{ textAlign: 'center' }}>Current Stock</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Category</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>MRP</th>
+                  <th className="si-th" style={{ textAlign: 'center' }}>Stock</th>
                 </tr>
               </thead>
               <tbody>
-                {data.lowStockMedicines.map(item => (
-                  <tr key={item.id} className="si-table-row">
-                    <td className="si-td font-medium">{item.name}</td>
-                    <td className="si-td text-muted" style={{ textAlign: 'center' }}>{item.batch}</td>
-                    <td className="si-td text-muted" style={{ textAlign: 'center' }}>{item.supplier}</td>
-                    <td className="si-td" style={{ textAlign: 'center' }}>
-                      <span className="pt-badge" style={{ backgroundColor: 'var(--color-danger)', color: '#fff' }}>
-                        {item.stock} Left
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {data.lowStockMedicines.length === 0 && (
+                {lowStockMedicines.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="si-empty-row">Inventory levels are healthy.</td>
+                    <td colSpan="4" className="si-empty-row">Inventory levels are healthy. ✅</td>
                   </tr>
+                ) : (
+                  lowStockMedicines.map(item => (
+                    <tr key={item._id} className="si-table-row">
+                      <td className="si-td" style={{ fontWeight: 600 }}>{item.name}</td>
+                      <td className="si-td" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>{item.category || '—'}</td>
+                      <td className="si-td" style={{ textAlign: 'center' }}>₹{item.mrp || 0}</td>
+                      <td className="si-td" style={{ textAlign: 'center' }}>
+                        <span className="db-stock-badge" data-level={item.stockQty === 0 ? 'zero' : 'low'}>
+                          {item.stockQty === 0 ? 'Out of Stock' : `${item.stockQty} Left`}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
                 )}
               </tbody>
             </table>
           </div>
         </div>
-
       </div>
-
-      {/* Date Range Picker Modal */}
-      <DateRangePicker 
-        isOpen={isDatePickerOpen} 
-        onClose={() => setIsDatePickerOpen(false)} 
-        onApply={handleApplyDateRange}
-        initialRange={dateRange}
-      />
     </div>
   );
 }
