@@ -592,6 +592,7 @@ export default function PurchaseInvoicePage() {
                       min="1"
                       value={item.qty}
                       onChange={(e) => handleUpdateItem(item.id, 'qty', Math.max(1, parseInt(e.target.value) || 1))}
+                      onFocus={(e) => e.target.select()}
                       onKeyDown={(e) => ['e', 'E', '+', '-', '.'].includes(e.key) && e.preventDefault()}
                     />
                   </td>
@@ -603,6 +604,7 @@ export default function PurchaseInvoicePage() {
                       step="0.01"
                       value={item.purchasePrice}
                       onChange={(e) => handleUpdateItem(item.id, 'purchasePrice', parseFloat(e.target.value) || 0)}
+                      onFocus={(e) => e.target.select()}
                       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                     />
                   </td>
@@ -614,6 +616,7 @@ export default function PurchaseInvoicePage() {
                       step="0.01"
                       value={item.mrp}
                       onChange={(e) => handleUpdateItem(item.id, 'mrp', parseFloat(e.target.value) || 0)}
+                      onFocus={(e) => e.target.select()}
                       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                     />
                   </td>
@@ -680,6 +683,7 @@ export default function PurchaseInvoicePage() {
                 step="0.01"
                 value={amountPaid}
                 onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
+                onFocus={(e) => e.target.select()}
                 onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
               />
             </div>

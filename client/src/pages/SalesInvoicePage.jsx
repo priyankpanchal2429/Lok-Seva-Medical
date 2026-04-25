@@ -589,6 +589,7 @@ export default function SalesInvoicePage() {
                       min="1"
                       value={item.qty}
                       onChange={(e) => handleUpdateItem(item.id, 'qty', Math.max(1, parseInt(e.target.value) || 1))}
+                      onFocus={(e) => e.target.select()}
                       onKeyDown={(e) => ['e', 'E', '+', '-', '.'].includes(e.key) && e.preventDefault()}
                     />
                   </td>
@@ -600,6 +601,7 @@ export default function SalesInvoicePage() {
                       step="0.01"
                       value={item.unitPrice}
                       onChange={(e) => handleUpdateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      onFocus={(e) => e.target.select()}
                       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                     />
                   </td>
@@ -658,6 +660,7 @@ export default function SalesInvoicePage() {
                 max="100"
                 value={discountPercent}
                 onChange={(e) => setDiscountPercent(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
+                onFocus={(e) => e.target.select()}
                 onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
               />
               <span className="si-discount-symbol">%</span>
