@@ -119,7 +119,7 @@ export default function MedicinesPage() {
   const handleAddClick = () => {
     setEditingId(null);
     setFormData({
-      name: '', stockQty: '', mrp: '', purchasePrice: '', batchNo: '', expiry: ''
+      name: '', category: '', stockQty: '', mrp: '', purchasePrice: '', batchNo: '', expiry: ''
     });
     setIsModalOpen(true);
   };
@@ -129,6 +129,7 @@ export default function MedicinesPage() {
     setEditingId(medicine._id);
     setFormData({
       name: medicine.name,
+      category: medicine.category || '',
       stockQty: medicine.stockQty || 0,
       mrp: medicine.mrp || 0,
       purchasePrice: medicine.purchasePrice || 0,
@@ -211,6 +212,7 @@ export default function MedicinesPage() {
           <thead>
             <tr>
               <th className="si-th">Medicine Name</th>
+              <th className="si-th">Category</th>
               <th className="si-th">Stock Qty</th>
               <th className="si-th">MRP (₹)</th>
               <th className="si-th">Purchase Price (₹)</th>
@@ -222,16 +224,17 @@ export default function MedicinesPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="7" className="si-empty-row">Loading medicines...</td>
+                <td colSpan="8" className="si-empty-row">Loading medicines...</td>
               </tr>
             ) : filteredMedicines.length === 0 ? (
               <tr>
-                <td colSpan="7" className="si-empty-row">No medicines found.</td>
+                <td colSpan="8" className="si-empty-row">No medicines found.</td>
               </tr>
             ) : (
               filteredMedicines.map((medicine) => (
                 <tr key={medicine._id} className="si-table-row">
                   <td className="si-td font-medium">{medicine.name}</td>
+                  <td className="si-td">{medicine.category || '-'}</td>
                   <td className="si-td">
                     <span className={`pt-badge ${medicine.stockQty <= 5 ? 'pt-badge-inactive' : ''}`} style={medicine.stockQty <= 5 ? { backgroundColor: 'var(--color-danger)', color: '#fff' } : {}}>
                       {medicine.stockQty}
@@ -272,16 +275,29 @@ export default function MedicinesPage() {
             </div>
             
             <form onSubmit={handleSubmit} className="pt-modal-body">
-              <div className="si-field">
-                <label className="si-label">Medicine Name *</label>
-                <input
-                  className="si-input"
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="si-field">
+                  <label className="si-label">Medicine Name *</label>
+                  <input
+                    className="si-input"
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="si-field">
+                  <label className="si-label">Category</label>
+                  <input
+                    className="si-input"
+                    type="text"
+                    name="category"
+                    placeholder="e.g. Antibiotic"
+                    value={formData.category}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
