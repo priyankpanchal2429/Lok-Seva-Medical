@@ -6,7 +6,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import api from '../utils/api';
 import DatePicker from '../components/DatePicker';
@@ -91,10 +90,11 @@ export default function SalesInvoicePage() {
   // Save state
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [editingInvoiceId, setEditingInvoiceId] = useState(null);
 
   // Invoice metadata
-  const [invoiceNumber] = useState(generateInvoiceNumber);
-  const [invoiceDate] = useState(() => new Date().toLocaleDateString('en-IN', {
+  const [invoiceNumber, setInvoiceNumber] = useState(generateInvoiceNumber());
+  const [invoiceDate, setInvoiceDate] = useState(() => new Date().toLocaleDateString('en-IN', {
     day: '2-digit', month: 'short', year: 'numeric',
   }));
 
@@ -123,20 +123,6 @@ export default function SalesInvoicePage() {
       }
     };
     loadPatients();
-  }, []);
-
-  // Handle click outside patient search
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (realPatientSearchRef.current && !realPatientSearchRef.current.contains(event.target)) {
-        setShowPatientResults(false);
-      }
-      if (medicineSearchRef.current && !medicineSearchRef.current.contains(event.target)) {
-        setShowMedicineResults(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   /** Handle Patient Search as user types */
@@ -180,6 +166,20 @@ export default function SalesInvoicePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [medicineResults, setMedicineResults] = useState([]);
   const [showMedicineResults, setShowMedicineResults] = useState(false);
+
+  // Handle click outside patient search
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (realPatientSearchRef.current && !realPatientSearchRef.current.contains(event.target)) {
+        setShowPatientResults(false);
+      }
+      if (medicineSearchRef.current && !medicineSearchRef.current.contains(event.target)) {
+        setShowMedicineResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const fetchMeds = async () => {
@@ -244,6 +244,25 @@ export default function SalesInvoicePage() {
     setDoctorName('');
     setDiscountPercent(0);
     setSearchQuery('');
+    setEditingInvoiceId(null);
+    setInvoiceNumber(generateInvoiceNumber());
+    setInvoiceDate(new Date().toLocaleDateString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+    }));
+  }, []);
+
+  const handleEditInvoice = useCallback((invoice) => {
+    setEditingInvoiceId(invoice._id);
+    setInvoiceNumber(invoice.invoiceNumber);
+    setInvoiceDate(invoice.invoiceDate);
+    setPatientName(invoice.patientName || '');
+    setPatientAge(invoice.patientAge || '');
+    setPatientPhone(invoice.patientPhone || '');
+    setPatientAddress(invoice.patientAddress || '');
+    setDoctorName(invoice.doctorName || '');
+    setItems(invoice.items.map(i => ({ ...i, id: i.id || Date.now() + Math.random() })));
+    setDiscountPercent(invoice.discountPercent || 0);
+    setActiveTab('create');
   }, []);
 
   // ---- Calculations ----
@@ -263,7 +282,11 @@ export default function SalesInvoicePage() {
     patientPhone,
     patientAddress,
     doctorName,
-    items: items.map(({ id, ...rest }) => rest), // strip client-only id
+    items: items.map(item => {
+      const copy = { ...item };
+      delete copy.id;
+      return copy;
+    }),
     subtotal,
     cgst,
     sgst,
@@ -285,7 +308,12 @@ export default function SalesInvoicePage() {
     setSaveError('');
     setIsSaving(true);
     try {
-      await api.post('/sales-invoices', buildPayload(status));
+      const payload = buildPayload(status);
+      if (editingInvoiceId) {
+        await api.put(`/sales-invoices/${editingInvoiceId}`, payload);
+      } else {
+        await api.post('/sales-invoices', payload);
+      }
       if (onSuccess) onSuccess();
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.message || err.message;
@@ -293,7 +321,7 @@ export default function SalesInvoicePage() {
     } finally {
       setIsSaving(false);
     }
-  }, [buildPayload]);
+  }, [buildPayload, editingInvoiceId, items.length]);
 
   const handleSaveDraft = useCallback(() => {
     saveInvoice('draft', () => setActiveTab('history'));
@@ -319,7 +347,7 @@ export default function SalesInvoicePage() {
         <div className="si-header-actions">
           {activeTab === 'history' ? (
             /* History view — single Add New button */
-            <button className="si-btn si-btn-primary" onClick={() => setActiveTab('create')}>
+            <button className="si-btn si-btn-primary" onClick={() => { handleClearInvoice(); setActiveTab('create'); }}>
               + Add New Invoice
             </button>
           ) : (
@@ -345,7 +373,11 @@ export default function SalesInvoicePage() {
 
       {/* ===== History View ===== */}
       {activeTab === 'history' && (
-        <SalesInvoiceHistoryPage embedded onNewInvoice={() => setActiveTab('create')} />
+        <SalesInvoiceHistoryPage 
+          embedded 
+          onNewInvoice={() => { handleClearInvoice(); setActiveTab('create'); }} 
+          onEditInvoice={handleEditInvoice} 
+        />
       )}
 
       {/* ===== Create Invoice Form ===== */}

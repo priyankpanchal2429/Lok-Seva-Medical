@@ -54,13 +54,38 @@ const createSalesInvoice = async (req, res) => {
 // @route PUT /api/sales-invoices/:id
 const updateSalesInvoice = async (req, res) => {
   try {
-    const invoice = await SalesInvoice.findByIdAndUpdate(
+    const oldInvoice = await SalesInvoice.findById(req.params.id);
+    if (!oldInvoice) return res.status(404).json({ message: 'Invoice not found' });
+
+    // Revert old stock if it was previously saved
+    if (oldInvoice.status === 'saved' && oldInvoice.items && oldInvoice.items.length > 0) {
+      for (const item of oldInvoice.items) {
+        if (!item.name) continue;
+        await Medicine.findOneAndUpdate(
+          { name: item.name },
+          { $inc: { stockQty: item.qty || 0 } }
+        );
+      }
+    }
+
+    const updatedInvoice = await SalesInvoice.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-    if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
-    res.json(invoice);
+
+    // Apply new stock if it is now saved
+    if (updatedInvoice.status === 'saved' && updatedInvoice.items && updatedInvoice.items.length > 0) {
+      for (const item of updatedInvoice.items) {
+        if (!item.name) continue;
+        await Medicine.findOneAndUpdate(
+          { name: item.name },
+          { $inc: { stockQty: -(item.qty || 0) } }
+        );
+      }
+    }
+
+    res.json(updatedInvoice);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import api from '../utils/api';
 
 // ============================================================
@@ -72,7 +71,6 @@ const deleteSupplier = async (id) => {
 // Component
 // ============================================================
 export default function SupplierPage() {
-  const { user } = useOutletContext();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,7 +106,8 @@ export default function SupplierPage() {
   }, []);
 
   useEffect(() => {
-    loadSuppliers();
+    const timer = setTimeout(() => loadSuppliers(), 0);
+    return () => clearTimeout(timer);
   }, [loadSuppliers]);
 
   // Handle phone change

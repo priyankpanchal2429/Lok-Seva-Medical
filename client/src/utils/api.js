@@ -43,14 +43,4 @@ api.interceptors.response.use(
   }
 );
 
-/**
- * Read a cookie value by name.
- * @param {string} name - Cookie name
- * @returns {string|null} Cookie value or null
- */
-function getCookie(name) {
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
-}
-
 export default api;

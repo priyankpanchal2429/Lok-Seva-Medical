@@ -28,6 +28,12 @@ const EyeIcon = () => (
     <circle cx="12" cy="12" r="3"></circle>
   </svg>
 );
+const EditIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+  </svg>
+);
 const TrashIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="3 6 5 6 21 6"></polyline>
@@ -213,7 +219,7 @@ function InvoiceDetailModal({ invoice, onClose }) {
 // ============================================================
 // Main Page Component
 // ============================================================
-export default function SalesInvoiceHistoryPage({ embedded = false, onNewInvoice }) {
+export default function SalesInvoiceHistoryPage({ embedded = false, onNewInvoice, onEditInvoice }) {
   useOutletContext();
 
   const [invoices, setInvoices] = useState([]);
@@ -236,7 +242,10 @@ export default function SalesInvoiceHistoryPage({ embedded = false, onNewInvoice
     }
   }, []);
 
-  useEffect(() => { loadInvoices(); }, [loadInvoices]);
+  useEffect(() => {
+    const timer = setTimeout(() => loadInvoices(), 0);
+    return () => clearTimeout(timer);
+  }, [loadInvoices]);
 
   const handleDelete = useCallback(async (id) => {
     if (!window.confirm('Are you sure you want to permanently delete this invoice?')) return;
@@ -308,10 +317,13 @@ export default function SalesInvoiceHistoryPage({ embedded = false, onNewInvoice
                   </td>
                   <td className="si-td">
                     <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                      <button className="si-btn si-btn-outline si-btn-sm" title="View & Print" onClick={() => setViewingInvoice(inv)}>
-                        <EyeIcon />
+                      <button className="si-btn si-btn-outline si-btn-sm" style={{ padding: '6px 12px' }} title="View & Print" onClick={() => setViewingInvoice(inv)}>
+                        <EyeIcon /> <span>View</span>
                       </button>
-                      <button className="si-btn si-btn-danger-outline si-btn-sm" title="Delete" onClick={() => handleDelete(inv._id)}>
+                      <button className="si-btn si-btn-outline si-btn-sm" style={{ padding: '6px 12px' }} title="Edit" onClick={() => onEditInvoice ? onEditInvoice(inv) : null}>
+                        <EditIcon /> <span>Edit</span>
+                      </button>
+                      <button className="si-btn si-btn-danger-outline si-btn-sm" style={{ padding: '6px 12px' }} title="Delete" onClick={() => handleDelete(inv._id)}>
                         <TrashIcon />
                       </button>
                     </div>

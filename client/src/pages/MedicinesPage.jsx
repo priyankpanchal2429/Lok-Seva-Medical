@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import api from '../utils/api';
 
 // ============================================================
@@ -72,7 +71,6 @@ const deleteMedicine = async (id) => {
 // Component
 // ============================================================
 export default function MedicinesPage() {
-  const { user } = useOutletContext();
   const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -106,7 +104,8 @@ export default function MedicinesPage() {
   }, []);
 
   useEffect(() => {
-    loadMedicines();
+    const timer = setTimeout(() => loadMedicines(), 0);
+    return () => clearTimeout(timer);
   }, [loadMedicines]);
 
   // Handle form change

@@ -70,15 +70,20 @@ export default function DateRangePicker({ isOpen, onClose, onApply, initialRange
   useEffect(() => {
     if (isOpen) {
       if (initialRange?.start && initialRange?.end) {
-        const start = parseDateString(initialRange.start);
-        const end = parseDateString(initialRange.end);
-        setStartDate(start);
-        setEndDate(end);
-        // Show the month of the start date
-        setViewDate(new Date(start.getFullYear(), start.getMonth(), 1));
+        const timer = setTimeout(() => {
+          const start = parseDateString(initialRange.start);
+          const end = parseDateString(initialRange.end);
+          setStartDate(start);
+          setEndDate(end);
+          setViewDate(new Date(start.getFullYear(), start.getMonth(), 1));
+        }, 0);
+        return () => clearTimeout(timer);
       } else {
         const today = new Date();
-        setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
+        const timer = setTimeout(() => {
+          setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
+        }, 0);
+        return () => clearTimeout(timer);
       }
     }
   }, [isOpen, initialRange]);
@@ -172,12 +177,13 @@ export default function DateRangePicker({ isOpen, onClose, onApply, initialRange
         start = new Date(today.getFullYear(), today.getMonth(), 1);
         end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
         break;
-      case 'Current F.Y.':
+      case 'Current F.Y.': {
         const currentMonth = today.getMonth();
         const startYear = currentMonth >= 3 ? today.getFullYear() : today.getFullYear() - 1;
         start = new Date(startYear, 3, 1); // April 1st
         end = new Date(startYear + 1, 2, 31); // March 31st
         break;
+      }
       default:
         break;
     }

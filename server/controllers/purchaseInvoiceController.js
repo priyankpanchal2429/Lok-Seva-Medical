@@ -63,13 +63,45 @@ const createPurchaseInvoice = async (req, res) => {
 // @route PUT /api/purchase-invoices/:id
 const updatePurchaseInvoice = async (req, res) => {
   try {
-    const invoice = await PurchaseInvoice.findByIdAndUpdate(
+    const oldInvoice = await PurchaseInvoice.findById(req.params.id);
+    if (!oldInvoice) return res.status(404).json({ message: 'Invoice not found' });
+
+    if (oldInvoice.status === 'saved' && oldInvoice.items && oldInvoice.items.length > 0) {
+      for (const item of oldInvoice.items) {
+        if (!item.name) continue;
+        await Medicine.findOneAndUpdate(
+          { name: item.name },
+          { $inc: { stockQty: -(item.qty || 0) } }
+        );
+      }
+    }
+
+    const updatedInvoice = await PurchaseInvoice.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-    if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
-    res.json(invoice);
+
+    if (updatedInvoice.status === 'saved' && updatedInvoice.items && updatedInvoice.items.length > 0) {
+      for (const item of updatedInvoice.items) {
+        if (!item.name) continue;
+        await Medicine.findOneAndUpdate(
+          { name: item.name },
+          {
+            $inc: { stockQty: item.qty || 0 },
+            $set: {
+              mrp: item.mrp || 0,
+              purchasePrice: item.purchasePrice || 0,
+              batchNo: item.batchNo || '',
+              expiry: item.expiry || ''
+            }
+          },
+          { upsert: true, new: true }
+        );
+      }
+    }
+
+    res.json(updatedInvoice);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

@@ -4,7 +4,7 @@
  * Allows manually adding medicines or uploading an Excel file to automatically populate rows.
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import DatePicker from '../components/DatePicker';
 import * as XLSX from 'xlsx';
@@ -72,6 +72,7 @@ export default function PurchaseInvoicePage() {
   // Save state
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [editingInvoiceId, setEditingInvoiceId] = useState(null);
 
   // Invoice Meta State
   const [supplierName, setSupplierName] = useState('');
@@ -132,6 +133,20 @@ export default function PurchaseInvoicePage() {
     setInvoiceNumber('');
     setAmountPaid(0);
     setInvoiceDate(new Date().toISOString().split('T')[0]);
+    setEditingInvoiceId(null);
+  }, []);
+
+  const handleEditPurchase = useCallback((invoice) => {
+    setEditingInvoiceId(invoice._id);
+    setInvoiceNumber(invoice.invoiceNumber || '');
+    // Convert date if needed or use as is
+    setInvoiceDate(invoice.invoiceDate || new Date().toISOString().split('T')[0]);
+    setSupplierName(invoice.supplierName || '');
+    setSupplierPhone(invoice.supplierPhone || '');
+    setSupplierGst(invoice.supplierGst || '');
+    setItems(invoice.items.map(i => ({ ...i, id: i.id || Date.now().toString() + Math.random() })));
+    setAmountPaid(invoice.amountPaid || 0);
+    setActiveTab('create');
   }, []);
 
   const medicineSearchRef = useRef(null);
@@ -243,7 +258,11 @@ export default function PurchaseInvoicePage() {
         supplierName,
         supplierPhone,
         supplierGst,
-        items: items.map(({ id, ...rest }) => rest),
+        items: items.map(item => {
+          const copy = { ...item };
+          delete copy.id;
+          return copy;
+        }),
         subtotal,
         cgst,
         sgst,
@@ -253,7 +272,13 @@ export default function PurchaseInvoicePage() {
         status: 'saved',
         receivedBy: user?.name || '',
       };
-      await api.post('/purchase-invoices', payload);
+      
+      if (editingInvoiceId) {
+        await api.put(`/purchase-invoices/${editingInvoiceId}`, payload);
+      } else {
+        await api.post('/purchase-invoices', payload);
+      }
+      
       setItems([]);
       setSupplierName('');
       setSupplierPhone('');
@@ -261,6 +286,7 @@ export default function PurchaseInvoicePage() {
       setInvoiceNumber('');
       setAmountPaid(0);
       setInvoiceDate(new Date().toISOString().split('T')[0]);
+      setEditingInvoiceId(null);
       setActiveTab('history');
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.message || err.message;
@@ -269,7 +295,7 @@ export default function PurchaseInvoicePage() {
       setIsSaving(false);
     }
   }, [items, invoiceNumber, invoiceDate, supplierName, supplierPhone, supplierGst,
-      subtotal, cgst, sgst, grandTotal, amountPaid, balance, user]);
+      subtotal, cgst, sgst, grandTotal, amountPaid, balance, user, editingInvoiceId]);
 
   return (
     <div className="si-page">
@@ -286,7 +312,7 @@ export default function PurchaseInvoicePage() {
         </div>
         <div className="si-header-actions">
           {activeTab === 'history' ? (
-            <button className="si-btn si-btn-primary" onClick={() => setActiveTab('create')}>
+            <button className="si-btn si-btn-primary" onClick={() => { handleClearInvoice(); setActiveTab('create'); }}>
               + Add New Purchase
             </button>
           ) : (
@@ -311,7 +337,11 @@ export default function PurchaseInvoicePage() {
 
       {/* ===== History View ===== */}
       {activeTab === 'history' && (
-        <PurchaseInvoiceHistoryPage embedded onNewPurchase={() => setActiveTab('create')} />
+        <PurchaseInvoiceHistoryPage 
+          embedded 
+          onNewPurchase={() => { handleClearInvoice(); setActiveTab('create'); }} 
+          onEditPurchase={handleEditPurchase}
+        />
       )}
 
       {/* ===== Create Form ===== */}

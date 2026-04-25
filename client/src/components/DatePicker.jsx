@@ -78,8 +78,11 @@ export default function DatePicker({
   // Sync view when value changes externally
   useEffect(() => {
     if (parsedValue) {
-      setViewYear(parsedValue.year);
-      setViewMonth(parsedValue.month);
+      const timer = setTimeout(() => {
+        setViewYear(parsedValue.year);
+        setViewMonth(parsedValue.month);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [parsedValue]);
 
@@ -175,11 +178,9 @@ export default function DatePicker({
     parsedValue && mode === 'month' && mi === parsedValue.month && viewYear === parsedValue.year;
 
   // ---- Year options for <select> ----
-  const yearOptions = useMemo(() => {
-    const years = [];
-    for (let y = today.getFullYear() - 10; y <= today.getFullYear() + 10; y++) years.push(y);
-    return years;
-  }, []);
+  const currentYear = today.getFullYear();
+  const yearOptions = [];
+  for (let y = currentYear - 10; y <= currentYear + 10; y++) yearOptions.push(y);
 
   // ---- Dropdown position (fixed, relative to viewport) ----
   const getPosition = useCallback(() => {
@@ -197,7 +198,14 @@ export default function DatePicker({
     return { top: rect.bottom + 4, left };
   }, []);
 
-  const pos = isOpen ? getPosition() : { top: 0, left: 0 };
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => setPos(getPosition()), 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, getPosition]);
 
   return (
     <div className={`dp-wrapper ${wrapperClassName}`}>

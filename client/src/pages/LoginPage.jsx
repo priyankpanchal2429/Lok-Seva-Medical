@@ -4,10 +4,10 @@
  * Allows users to toggle between Sign In and Create Account modes.
  */
 
-import { useState, useCallback, useRef, useEffect, memo } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { sanitizeInput, isEmpty } from '../utils/sanitize';
+import { sanitizeInput } from '../utils/sanitize';
 import ThemeToggle from '../components/ThemeToggle';
 
 /** SVG icons and branding */

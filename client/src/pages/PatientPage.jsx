@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import api from '../utils/api';
 
 // ============================================================
@@ -72,7 +71,6 @@ const deletePatient = async (id) => {
 // Component
 // ============================================================
 export default function PatientPage() {
-  const { user } = useOutletContext();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,7 +108,8 @@ export default function PatientPage() {
   }, []);
 
   useEffect(() => {
-    loadPatients();
+    const timer = setTimeout(() => loadPatients(), 0);
+    return () => clearTimeout(timer);
   }, [loadPatients]);
 
   // Handle phone change
