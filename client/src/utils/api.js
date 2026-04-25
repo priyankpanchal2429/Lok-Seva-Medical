@@ -12,7 +12,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000, // Slightly longer timeout for production
+  timeout: 60000, // 60 seconds to accommodate Render free tier cold starts
 });
 
 /**

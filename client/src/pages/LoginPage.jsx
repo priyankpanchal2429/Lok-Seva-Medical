@@ -57,8 +57,12 @@ export default function LoginPage() {
 
   const userIdRef = useRef(null);
 
-  // Auto-focus User ID on mount
-  useEffect(() => { userIdRef.current?.focus(); }, []);
+  // Auto-focus User ID on mount & Pre-warm server
+  useEffect(() => { 
+    userIdRef.current?.focus(); 
+    // Ping health endpoint to wake up Render free-tier server
+    api.get('/health').catch(() => {});
+  }, []);
 
   // Handle Input Changes
   const handleChange = (e) => {
@@ -78,6 +82,11 @@ export default function LoginPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setStatus({ type: '', message: '' });
+
+    // Show helpful message if it takes a while (Render cold start)
+    const wakeUpTimer = setTimeout(() => {
+      setStatus({ type: 'info', message: 'Server is waking up from sleep. This usually takes 30-50 seconds...' });
+    }, 3000);
 
     const sanitizedUserId = sanitizeInput(formData.userId).trim();
 
@@ -118,9 +127,13 @@ export default function LoginPage() {
         setMode('login'); // Switch to login mode after success
       }
     } catch (error) {
-      const msg = error.response?.data?.error || error.message || 'Action failed.';
+      let msg = error.response?.data?.error || error.message || 'Action failed.';
+      if (error.code === 'ECONNABORTED') {
+        msg = 'Server took too long to respond. Please try again.';
+      }
       setStatus({ type: 'error', message: msg });
     } finally {
+      clearTimeout(wakeUpTimer);
       setIsSubmitting(false);
     }
   };
@@ -153,7 +166,11 @@ export default function LoginPage() {
             {/* Status Messages */}
             <div className="error-container">
               {status.message && (
-                <div style={status.type === 'error' ? styles.generalError : styles.successBox}>
+                <div style={
+                  status.type === 'error' ? styles.generalError : 
+                  status.type === 'success' ? styles.successBox : 
+                  styles.infoBox
+                }>
                   {status.message}
                 </div>
               )}
@@ -314,6 +331,7 @@ const styles = {
   eyeButton: { position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' },
   generalError: { fontSize: '13px', color: 'var(--color-error)', backgroundColor: 'var(--color-error-bg)', padding: '10px 12px', borderRadius: '4px', border: '1px solid var(--color-error)' },
   successBox: { fontSize: '13px', color: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.1)', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(34, 197, 94, 0.2)' },
+  infoBox: { fontSize: '13px', color: 'var(--color-primary)', backgroundColor: 'rgba(59, 130, 246, 0.1)', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.2)' },
   rememberRow: { display: 'flex', alignItems: 'center' },
   rememberLabel: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--color-text-secondary)', cursor: 'pointer' },
   checkbox: { width: '15px', height: '15px', accentColor: 'var(--color-primary)', cursor: 'pointer' },
