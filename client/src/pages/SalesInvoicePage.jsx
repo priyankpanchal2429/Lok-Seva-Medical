@@ -128,16 +128,12 @@ export default function SalesInvoicePage() {
   /** Handle Patient Search as user types */
   const handlePatientSearch = (value) => {
     setPatientName(value);
-    if (value.trim().length > 0) {
-      const filtered = allPatients.filter(p => 
-        p.fullName.toLowerCase().includes(value.toLowerCase()) || 
-        p.phoneNumber.includes(value)
-      );
-      setFilteredPatients(filtered);
-      setShowPatientResults(true);
-    } else {
-      setShowPatientResults(false);
-    }
+    const filtered = allPatients.filter(p => 
+      p.fullName.toLowerCase().includes(value.toLowerCase()) || 
+      p.phoneNumber.includes(value)
+    );
+    setFilteredPatients(filtered);
+    setShowPatientResults(true);
   };
 
   /** Select patient from search results */
@@ -183,17 +179,15 @@ export default function SalesInvoicePage() {
 
   useEffect(() => {
     const fetchMeds = async () => {
-      if (searchQuery.trim().length > 1) {
-        try {
-          const { data } = await api.get(`/medicines?search=${searchQuery}`);
-          setMedicineResults(data);
-          setShowMedicineResults(true);
-        } catch (err) {
-          console.error(err);
-        }
-      } else {
-        setMedicineResults([]);
-        setShowMedicineResults(false);
+      try {
+        const { data } = await api.get(`/medicines?search=${searchQuery}`);
+        setMedicineResults(data.slice(0, 50));
+        setShowMedicineResults(prev => {
+          if (searchQuery.trim() === '' && !prev) return prev;
+          return true;
+        });
+      } catch (err) {
+        console.error(err);
       }
     };
     const delayDebounce = setTimeout(fetchMeds, 300);
@@ -417,6 +411,7 @@ export default function SalesInvoicePage() {
                 placeholder="Search or enter name"
                 value={patientName}
                 onChange={(e) => handlePatientSearch(e.target.value)}
+                onFocus={() => handlePatientSearch(patientName)}
                 autoComplete="off"
               />
               {showPatientResults && filteredPatients.length > 0 && (
@@ -494,7 +489,7 @@ export default function SalesInvoicePage() {
             placeholder="Search medicine by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => { if (medicineResults.length > 0) setShowMedicineResults(true); }}
+            onFocus={() => setShowMedicineResults(true)}
           />
           {showMedicineResults && medicineResults.length > 0 && (
             <div className="si-autocomplete-dropdown" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '6px', maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', marginTop: '4px' }}>

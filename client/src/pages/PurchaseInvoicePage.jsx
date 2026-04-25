@@ -78,6 +78,42 @@ export default function PurchaseInvoicePage() {
   const [supplierName, setSupplierName] = useState('');
   const [supplierPhone, setSupplierPhone] = useState('');
   const [supplierGst, setSupplierGst] = useState('');
+
+  // Supplier Search State
+  const [allSuppliers, setAllSuppliers] = useState([]);
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
+  const [showSupplierResults, setShowSupplierResults] = useState(false);
+  const supplierSearchRef = useRef(null);
+
+  // Load suppliers for search
+  useEffect(() => {
+    const loadSuppliers = async () => {
+      try {
+        const { data } = await api.get('/suppliers');
+        setAllSuppliers(data);
+      } catch (err) {
+        console.error('Error fetching suppliers:', err);
+      }
+    };
+    loadSuppliers();
+  }, []);
+
+  const handleSupplierSearch = (value) => {
+    setSupplierName(value);
+    const filtered = allSuppliers.filter(s => 
+      (s.name || '').toLowerCase().includes(value.toLowerCase()) || 
+      (s.contactNumber || '').includes(value)
+    );
+    setFilteredSuppliers(filtered);
+    setShowSupplierResults(true);
+  };
+
+  const selectSupplier = (supplier) => {
+    setSupplierName(supplier.name || '');
+    setSupplierPhone(supplier.contactNumber || '');
+    setSupplierGst(supplier.gstin || '');
+    setShowSupplierResults(false);
+  };
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(() => {
     const today = new Date();
@@ -156,17 +192,15 @@ export default function PurchaseInvoicePage() {
 
   useEffect(() => {
     const fetchMeds = async () => {
-      if (searchQuery.trim().length > 1) {
-        try {
-          const { data } = await api.get(`/medicines?search=${searchQuery}`);
-          setMedicineResults(data);
-          setShowMedicineResults(true);
-        } catch (err) {
-          console.error(err);
-        }
-      } else {
-        setMedicineResults([]);
-        setShowMedicineResults(false);
+      try {
+        const { data } = await api.get(`/medicines?search=${searchQuery}`);
+        setMedicineResults(data.slice(0, 50));
+        setShowMedicineResults(prev => {
+          if (searchQuery.trim() === '' && !prev) return prev;
+          return true;
+        });
+      } catch (err) {
+        console.error(err);
       }
     };
     const delayDebounce = setTimeout(fetchMeds, 300);
@@ -177,6 +211,9 @@ export default function PurchaseInvoicePage() {
     const handleClickOutside = (event) => {
       if (medicineSearchRef.current && !medicineSearchRef.current.contains(event.target)) {
         setShowMedicineResults(false);
+      }
+      if (supplierSearchRef.current && !supplierSearchRef.current.contains(event.target)) {
+        setShowSupplierResults(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -384,15 +421,31 @@ export default function PurchaseInvoicePage() {
         <div className="si-card si-patient-info">
           <h3 className="si-card-title">Supplier Details</h3>
           <div className="si-field-row">
-            <div className="si-field">
+            <div className="si-field si-pos-relative" ref={supplierSearchRef}>
               <label className="si-label">Supplier Name</label>
               <input
                 className="si-input"
                 type="text"
                 placeholder="Enter distributor name"
                 value={supplierName}
-                onChange={(e) => setSupplierName(e.target.value)}
+                onChange={(e) => handleSupplierSearch(e.target.value)}
+                onFocus={() => handleSupplierSearch(supplierName)}
+                autoComplete="off"
               />
+              {showSupplierResults && filteredSuppliers.length > 0 && (
+                <div className="si-search-results">
+                  {filteredSuppliers.map(s => (
+                    <div 
+                      key={s._id} 
+                      className="si-search-item"
+                      onClick={() => selectSupplier(s)}
+                    >
+                      <div className="si-search-item-name">{s.name}</div>
+                      <div className="si-search-item-meta">{s.contactNumber} • {s.gstin ? `GST: ${s.gstin}` : 'No GST'}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="si-field">
               <label className="si-label">Contact Number</label>
@@ -432,7 +485,7 @@ export default function PurchaseInvoicePage() {
             placeholder="Search medicine by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => { if (medicineResults.length > 0) setShowMedicineResults(true); }}
+            onFocus={() => setShowMedicineResults(true)}
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', color: 'var(--color-text)' }}
           />
           {showMedicineResults && medicineResults.length > 0 && (
