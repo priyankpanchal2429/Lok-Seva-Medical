@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import api from '../utils/api';
 
 // ============================================================
 // SVG Icons
@@ -47,60 +48,24 @@ const CloseIcon = () => (
 // ============================================================
 // API Calls
 // ============================================================
-const API_BASE = import.meta.env.VITE_API_URL || '';
 const fetchPatients = async () => {
-  const res = await fetch(`${API_BASE}/api/patients`, {
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => null);
-    throw new Error(errorData?.message || 'Failed to fetch patients');
-  }
-  return res.json();
+  const { data } = await api.get('/patients');
+  return data;
 };
 
-const createPatient = async (data) => {
-  const res = await fetch(`${API_BASE}/api/patients`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}`
-    },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => null);
-    throw new Error(errorData?.message || errorData?.error || 'Failed to create patient');
-  }
-  return res.json();
+const createPatient = async (payload) => {
+  const { data } = await api.post('/patients', payload);
+  return data;
 };
 
-const updatePatient = async (id, data) => {
-  const res = await fetch(`${API_BASE}/api/patients/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}`
-    },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => null);
-    throw new Error(errorData?.message || errorData?.error || 'Failed to update patient');
-  }
-  return res.json();
+const updatePatient = async (id, payload) => {
+  const { data } = await api.put(`/patients/${id}`, payload);
+  return data;
 };
 
 const deletePatient = async (id) => {
-  const res = await fetch(`${API_BASE}/api/patients/${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => null);
-    throw new Error(errorData?.message || errorData?.error || 'Failed to delete patient');
-  }
-  return res.json();
+  const { data } = await api.delete(`/patients/${id}`);
+  return data;
 };
 
 // ============================================================
@@ -198,7 +163,8 @@ export default function PatientPage() {
       setIsModalOpen(false);
       loadPatients();
     } catch (err) {
-      alert(err.message);
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message;
+      alert(msg);
     }
   };
 
@@ -209,7 +175,8 @@ export default function PatientPage() {
         await deletePatient(id);
         loadPatients();
       } catch (err) {
-        alert(err.message);
+        const msg = err.response?.data?.error || err.response?.data?.message || err.message;
+        alert(msg);
       }
     }
   };

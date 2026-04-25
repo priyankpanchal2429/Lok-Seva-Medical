@@ -8,6 +8,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import DatePicker from '../components/DatePicker';
 import * as XLSX from 'xlsx';
+import api from '../utils/api';
 import PurchaseInvoiceHistoryPage from './PurchaseInvoiceHistoryPage';
 
 // ============================================================
@@ -218,19 +219,18 @@ export default function PurchaseInvoicePage() {
         status: 'saved',
         receivedBy: user?.name || '',
       };
-      const API_BASE = import.meta.env.VITE_API_URL || '';
-      const res = await fetch(`${API_BASE}/api/purchase-invoices`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error('Failed to save purchase invoice');
+      await api.post('/purchase-invoices', payload);
+      setItems([]);
+      setSupplierName('');
+      setSupplierPhone('');
+      setSupplierGst('');
+      setInvoiceNumber('');
+      setAmountPaid(0);
+      setInvoiceDate(new Date().toISOString().split('T')[0]);
       setActiveTab('history');
     } catch (err) {
-      setSaveError(err.message);
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message;
+      setSaveError(msg);
     } finally {
       setIsSaving(false);
     }

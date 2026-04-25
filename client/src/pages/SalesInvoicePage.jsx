@@ -6,6 +6,9 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import api from '../utils/api';
 import DatePicker from '../components/DatePicker';
 import SalesInvoiceHistoryPage from './SalesInvoiceHistoryPage';
 
@@ -108,19 +111,12 @@ export default function SalesInvoicePage() {
   const [showPatientResults, setShowPatientResults] = useState(false);
   const patientSearchRef = useRef(null);
 
-  const API_BASE = import.meta.env.VITE_API_URL || '';
-
   // Load patients for search
   useEffect(() => {
     const loadPatients = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/patients`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setAllPatients(data);
-        }
+        const { data } = await api.get('/patients');
+        setAllPatients(data);
       } catch (err) {
         console.error('Error fetching patients for search:', err);
       }
@@ -264,23 +260,15 @@ export default function SalesInvoicePage() {
     setSaveError('');
     setIsSaving(true);
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || '';
-      const res = await fetch(`${API_BASE}/api/sales-invoices`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}`,
-        },
-        body: JSON.stringify(buildPayload(status)),
-      });
-      if (!res.ok) throw new Error('Failed to save invoice');
+      await api.post('/sales-invoices', buildPayload(status));
       if (onSuccess) onSuccess();
     } catch (err) {
-      setSaveError(err.message);
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message;
+      setSaveError(msg);
     } finally {
       setIsSaving(false);
     }
-  }, [items, buildPayload]);
+  }, [buildPayload]);
 
   const handleSaveDraft = useCallback(() => {
     saveInvoice('draft', () => setActiveTab('history'));

@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import api from '../utils/api';
 
 // ============================================================
 // SVG Icons
@@ -40,20 +41,16 @@ const CloseIcon = () => (
 );
 
 // ============================================================
-// API Helpers
+// API Calls
 // ============================================================
-const authHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` });
-
-const API_BASE = import.meta.env.VITE_API_URL || '';
 const fetchInvoices = async () => {
-  const res = await fetch(`${API_BASE}/api/sales-invoices`, { headers: authHeader() });
-  if (!res.ok) throw new Error('Failed to fetch invoices');
-  return res.json();
+  const { data } = await api.get('/sales-invoices');
+  return data;
 };
 
 const deleteInvoice = async (id) => {
-  const res = await fetch(`${API_BASE}/api/sales-invoices/${id}`, { method: 'DELETE', headers: authHeader() });
-  if (!res.ok) throw new Error('Failed to delete invoice');
+  const { data } = await api.delete(`/sales-invoices/${id}`);
+  return data;
 };
 
 // ============================================================
@@ -232,7 +229,8 @@ export default function SalesInvoiceHistoryPage({ embedded = false, onNewInvoice
       const data = await fetchInvoices();
       setInvoices(data);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setInvoices([]);
     } finally {
       setLoading(false);
     }

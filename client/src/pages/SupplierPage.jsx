@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import api from '../utils/api';
 
 // ============================================================
 // SVG Icons
@@ -47,48 +48,24 @@ const CloseIcon = () => (
 // ============================================================
 // API Calls
 // ============================================================
-const API_BASE = import.meta.env.VITE_API_URL || '';
 const fetchSuppliers = async () => {
-  const res = await fetch(`${API_BASE}/api/suppliers`, {
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
-  });
-  if (!res.ok) throw new Error('Failed to fetch suppliers');
-  return res.json();
+  const { data } = await api.get('/suppliers');
+  return data;
 };
 
-const createSupplier = async (data) => {
-  const res = await fetch(`${API_BASE}/api/suppliers`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}`
-    },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) throw new Error('Failed to create supplier');
-  return res.json();
+const createSupplier = async (payload) => {
+  const { data } = await api.post('/suppliers', payload);
+  return data;
 };
 
-const updateSupplier = async (id, data) => {
-  const res = await fetch(`${API_BASE}/api/suppliers/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}`
-    },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) throw new Error('Failed to update supplier');
-  return res.json();
+const updateSupplier = async (id, payload) => {
+  const { data } = await api.put(`/suppliers/${id}`, payload);
+  return data;
 };
 
 const deleteSupplier = async (id) => {
-  const res = await fetch(`${API_BASE}/api/suppliers/${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
-  });
-  if (!res.ok) throw new Error('Failed to delete supplier');
-  return res.json();
+  const { data } = await api.delete(`/suppliers/${id}`);
+  return data;
 };
 
 // ============================================================
@@ -183,7 +160,8 @@ export default function SupplierPage() {
       setIsModalOpen(false);
       loadSuppliers();
     } catch (err) {
-      alert(err.message);
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message;
+      alert(msg);
     }
   };
 
@@ -194,7 +172,8 @@ export default function SupplierPage() {
         await deleteSupplier(id);
         loadSuppliers();
       } catch (err) {
-        alert(err.message);
+        const msg = err.response?.data?.error || err.response?.data?.message || err.message;
+        alert(msg);
       }
     }
   };
