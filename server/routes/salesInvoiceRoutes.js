@@ -3,7 +3,7 @@
  */
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 const {
   getSalesInvoices,
   getSalesInvoiceById,
@@ -13,12 +13,12 @@ const {
 } = require('../controllers/salesInvoiceController');
 
 router.route('/')
-  .get(protect, getSalesInvoices)
-  .post(protect, createSalesInvoice);
+  .get(authMiddleware, getSalesInvoices)
+  .post(authMiddleware, createSalesInvoice);
 
 router.route('/:id')
-  .get(protect, getSalesInvoiceById)
-  .put(protect, updateSalesInvoice)
-  .delete(protect, deleteSalesInvoice);
+  .get(authMiddleware, getSalesInvoiceById)
+  .put(authMiddleware, updateSalesInvoice)
+  .delete(authMiddleware, deleteSalesInvoice);
 
 module.exports = router;
