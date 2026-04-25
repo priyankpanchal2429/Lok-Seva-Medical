@@ -134,7 +134,7 @@ export default function PurchaseInvoicePage() {
     setInvoiceDate(new Date().toISOString().split('T')[0]);
   }, []);
 
-  const medicineSearchRef = React.useRef(null);
+  const medicineSearchRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [medicineResults, setMedicineResults] = useState([]);
   const [showMedicineResults, setShowMedicineResults] = useState(false);
@@ -160,9 +160,6 @@ export default function PurchaseInvoicePage() {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (supplierSearchRef.current && !supplierSearchRef.current.contains(event.target)) {
-        setShowSupplierResults(false);
-      }
       if (medicineSearchRef.current && !medicineSearchRef.current.contains(event.target)) {
         setShowMedicineResults(false);
       }

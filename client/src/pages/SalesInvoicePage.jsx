@@ -83,6 +83,7 @@ const generateInvoiceNumber = () => {
 export default function SalesInvoicePage() {
   const { user } = useOutletContext();
   const searchInputRef = useRef(null);
+  const medicineSearchRef = useRef(null);
 
   // Tab state: 'history' is the default view; 'create' shows the form
   const [activeTab, setActiveTab] = useState('history');
