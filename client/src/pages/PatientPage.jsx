@@ -51,7 +51,10 @@ const fetchPatients = async () => {
   const res = await fetch('/api/patients', {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
   });
-  if (!res.ok) throw new Error('Failed to fetch patients');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.message || 'Failed to fetch patients');
+  }
   return res.json();
 };
 
@@ -64,7 +67,10 @@ const createPatient = async (data) => {
     },
     body: JSON.stringify(data)
   });
-  if (!res.ok) throw new Error('Failed to create patient');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.message || errorData?.error || 'Failed to create patient');
+  }
   return res.json();
 };
 
@@ -77,7 +83,10 @@ const updatePatient = async (id, data) => {
     },
     body: JSON.stringify(data)
   });
-  if (!res.ok) throw new Error('Failed to update patient');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.message || errorData?.error || 'Failed to update patient');
+  }
   return res.json();
 };
 
@@ -86,7 +95,10 @@ const deletePatient = async (id) => {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
   });
-  if (!res.ok) throw new Error('Failed to delete patient');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(errorData?.message || errorData?.error || 'Failed to delete patient');
+  }
   return res.json();
 };
 
