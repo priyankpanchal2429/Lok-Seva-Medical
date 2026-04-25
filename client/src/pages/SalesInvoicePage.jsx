@@ -108,11 +108,13 @@ export default function SalesInvoicePage() {
   const [showPatientResults, setShowPatientResults] = useState(false);
   const patientSearchRef = useRef(null);
 
+  const API_BASE = import.meta.env.VITE_API_URL || '';
+
   // Load patients for search
   useEffect(() => {
     const loadPatients = async () => {
       try {
-        const res = await fetch('/api/patients', {
+        const res = await fetch(`${API_BASE}/api/patients`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
         });
         if (res.ok) {
@@ -262,7 +264,8 @@ export default function SalesInvoicePage() {
     setSaveError('');
     setIsSaving(true);
     try {
-      const res = await fetch('/api/sales-invoices', {
+      const API_BASE = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${API_BASE}/api/sales-invoices`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

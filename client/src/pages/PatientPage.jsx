@@ -47,8 +47,9 @@ const CloseIcon = () => (
 // ============================================================
 // API Calls
 // ============================================================
+const API_BASE = import.meta.env.VITE_API_URL || '';
 const fetchPatients = async () => {
-  const res = await fetch('/api/patients', {
+  const res = await fetch(`${API_BASE}/api/patients`, {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
   });
   if (!res.ok) {
@@ -59,7 +60,7 @@ const fetchPatients = async () => {
 };
 
 const createPatient = async (data) => {
-  const res = await fetch('/api/patients', {
+  const res = await fetch(`${API_BASE}/api/patients`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -75,7 +76,7 @@ const createPatient = async (data) => {
 };
 
 const updatePatient = async (id, data) => {
-  const res = await fetch(`/api/patients/${id}`, {
+  const res = await fetch(`${API_BASE}/api/patients/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -91,7 +92,7 @@ const updatePatient = async (id, data) => {
 };
 
 const deletePatient = async (id) => {
-  const res = await fetch(`/api/patients/${id}`, {
+  const res = await fetch(`${API_BASE}/api/patients/${id}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
   });

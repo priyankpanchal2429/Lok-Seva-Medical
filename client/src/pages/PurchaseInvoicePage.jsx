@@ -218,7 +218,8 @@ export default function PurchaseInvoicePage() {
         status: 'saved',
         receivedBy: user?.name || '',
       };
-      const res = await fetch('/api/purchase-invoices', {
+      const API_BASE = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${API_BASE}/api/purchase-invoices`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

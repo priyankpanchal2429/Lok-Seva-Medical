@@ -44,14 +44,15 @@ const CloseIcon = () => (
 // ============================================================
 const authHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` });
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
 const fetchInvoices = async () => {
-  const res = await fetch('/api/purchase-invoices', { headers: authHeader() });
+  const res = await fetch(`${API_BASE}/api/purchase-invoices`, { headers: authHeader() });
   if (!res.ok) throw new Error('Failed to fetch purchase invoices');
   return res.json();
 };
 
 const deleteInvoice = async (id) => {
-  const res = await fetch(`/api/purchase-invoices/${id}`, { method: 'DELETE', headers: authHeader() });
+  const res = await fetch(`${API_BASE}/api/purchase-invoices/${id}`, { method: 'DELETE', headers: authHeader() });
   if (!res.ok) throw new Error('Failed to delete invoice');
 };
 

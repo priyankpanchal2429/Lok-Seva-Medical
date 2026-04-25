@@ -47,8 +47,9 @@ const CloseIcon = () => (
 // ============================================================
 // API Calls
 // ============================================================
+const API_BASE = import.meta.env.VITE_API_URL || '';
 const fetchSuppliers = async () => {
-  const res = await fetch('/api/suppliers', {
+  const res = await fetch(`${API_BASE}/api/suppliers`, {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
   });
   if (!res.ok) throw new Error('Failed to fetch suppliers');
@@ -56,7 +57,7 @@ const fetchSuppliers = async () => {
 };
 
 const createSupplier = async (data) => {
-  const res = await fetch('/api/suppliers', {
+  const res = await fetch(`${API_BASE}/api/suppliers`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ const createSupplier = async (data) => {
 };
 
 const updateSupplier = async (id, data) => {
-  const res = await fetch(`/api/suppliers/${id}`, {
+  const res = await fetch(`${API_BASE}/api/suppliers/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -82,7 +83,7 @@ const updateSupplier = async (id, data) => {
 };
 
 const deleteSupplier = async (id) => {
-  const res = await fetch(`/api/suppliers/${id}`, {
+  const res = await fetch(`${API_BASE}/api/suppliers/${id}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${localStorage.getItem('lok-seva-token')}` }
   });
