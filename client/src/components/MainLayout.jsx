@@ -198,15 +198,15 @@ export default function MainLayout({ user }) {
         <div className="layout-header-inner">
           {/* === Logo (left) === */}
           <div className="layout-header-left">
-            <div className="layout-store-name" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <div className="layout-store-name" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 <path d="M12 8v8"></path>
                 <path d="M8 12h8"></path>
               </svg>
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-text)', lineHeight: 1.1, letterSpacing: '-0.5px' }}>Lok Seva</div>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-primary)', letterSpacing: '0.8px', textTransform: 'uppercase', marginTop: '2px' }}>Medical Store</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-text)', lineHeight: 1.1, letterSpacing: '-0.5px' }}>Lok Seva</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--color-primary)', letterSpacing: '0.8px', textTransform: 'uppercase', marginTop: '2px' }}>Medical Store</div>
               </div>
             </div>
           </div>

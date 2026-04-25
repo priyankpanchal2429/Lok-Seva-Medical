@@ -243,13 +243,13 @@ body {
 .fy-trigger-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   background-color: var(--color-surface);
   color: var(--color-text);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  height: 42px;
-  padding: 0 16px;
+  height: 36px;
+  padding: 0 12px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   cursor: pointer;
@@ -559,7 +559,7 @@ body {
   display: grid;
   grid-template-columns: 0.7fr auto 1fr;  /* Smaller left pushes nav left */
   align-items: center;
-  padding: 12px 24px;
+  padding: 8px 24px;
 }
 
 .layout-header-left {
@@ -594,13 +594,13 @@ body {
 .top-nav-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
+  gap: 6px;
+  padding: 8px 14px;
   border-radius: 6px;
   background: none;
   border: none;
   color: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -608,8 +608,8 @@ body {
 }
 
 .top-nav-item svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .top-nav-item:hover {
@@ -639,7 +639,7 @@ body {
   gap: 8px;
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
-  padding: 4px 12px 4px 4px;
+  padding: 3px 10px 3px 3px;
   border-radius: 24px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -650,8 +650,8 @@ body {
 }
 
 .user-avatar-small {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background-color: var(--color-primary-light);
   color: var(--color-primary);
