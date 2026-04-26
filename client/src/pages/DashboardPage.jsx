@@ -52,19 +52,18 @@ function OutstandingCard({ type, data }) {
   const isSales = type === 'sales';
   const title = isSales ? 'Sales Outstanding' : 'Purchase Outstanding';
   const subtitle = isSales ? 'Total Receivables' : 'Total Payables';
-  const accentColor = isSales ? '#00cc99' : '#6366f1';
   const icon = isSales ? <ArrowDownIcon /> : <ArrowUpIcon />;
 
   const total = data?.total || 0;
   const aging = data?.aging || { current: 0, '1-15': 0, '16-30': 0, '30+': 0 };
   const invoiceCount = data?.invoiceCount || 0;
 
-  // Aging bucket config
+  // Aging bucket config — uses only the provided 5-color palette
   const buckets = [
-    { key: 'current', label: 'Current',     color: '#00cc99', sublabel: 'Not due'   },
-    { key: '1-15',    label: '1-15 Days',   color: '#f59e0b', sublabel: 'Overdue'   },
-    { key: '16-30',   label: '16-30 Days',  color: '#f97316', sublabel: 'Overdue'   },
-    { key: '30+',     label: '30+ Days',    color: '#ef4444', sublabel: 'Overdue'   },
+    { key: 'current', label: 'Current',    color: '#B3D7E0' },
+    { key: '1-15',    label: '1-15 Days',  color: '#7FB3C1' },
+    { key: '16-30',   label: '16-30 Days', color: '#2A7A9D' },
+    { key: '30+',     label: '30+ Days',   color: '#1A4D6D' },
   ];
 
   // Calculate progress bar segment widths
@@ -79,7 +78,7 @@ function OutstandingCard({ type, data }) {
       {/* Header */}
       <div className="db-outstanding-header">
         <div className="db-outstanding-title-row">
-          <div className="db-outstanding-icon" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
+          <div className="db-outstanding-icon">
             {icon}
           </div>
           <h3 className="db-outstanding-title">{title}</h3>
@@ -90,7 +89,7 @@ function OutstandingCard({ type, data }) {
       {/* Total Amount */}
       <div className="db-outstanding-total">
         <span className="db-outstanding-total-label">{subtitle}</span>
-        <span className="db-outstanding-total-amount" style={{ color: accentColor }}>
+        <span className="db-outstanding-total-amount">
           ₹ {total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </span>
       </div>
@@ -234,7 +233,7 @@ export default function DashboardPage() {
       </div>
       {/* Error banner */}
       {fetchError && (
-        <div style={{ marginTop: '16px', padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '13px', fontWeight: 500 }}>
+        <div style={{ marginTop: '16px', padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(26, 77, 109, 0.1)', border: '1px solid rgba(26, 77, 109, 0.3)', color: '#1A4D6D', fontSize: '13px', fontWeight: 500 }}>
           ⚠️ {fetchError}
         </div>
       )}
@@ -280,7 +279,7 @@ export default function DashboardPage() {
                       <td className="si-td" style={{ fontWeight: 600 }}>{item.name}</td>
                       <td className="si-td" style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>{item.batchNo || '—'}</td>
                       <td className="si-td" style={{ textAlign: 'center' }}>{item.stockQty || 0}</td>
-                      <td className="si-td" style={{ textAlign: 'center', color: 'var(--color-warning)', fontWeight: 600 }}>{item.expiry || '—'}</td>
+                      <td className="si-td" style={{ textAlign: 'center', color: '#2A7A9D', fontWeight: 600 }}>{item.expiry || '—'}</td>
                     </tr>
                   ))
                 )}

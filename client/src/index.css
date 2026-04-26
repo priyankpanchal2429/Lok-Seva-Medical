@@ -1725,6 +1725,8 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: rgba(74, 155, 190, 0.12);
+  color: #4A9BBE;
 }
 
 .db-outstanding-title {
@@ -1761,6 +1763,7 @@ input[type="number"] {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  color: #4A9BBE;
 }
 
 /* Progress bar */
@@ -1879,13 +1882,13 @@ input[type="number"] {
 }
 
 .db-stock-badge[data-level="zero"] {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
+  background: rgba(26, 77, 109, 0.15);
+  color: #1A4D6D;
 }
 
 .db-stock-badge[data-level="low"] {
-  background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
+  background: rgba(42, 122, 157, 0.15);
+  color: #2A7A9D;
 }
 
 /* Loading spinner */
